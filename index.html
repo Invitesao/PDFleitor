@@ -467,6 +467,14 @@
             margin: 10px 0;
             border: 2px solid #e1e5e9;
         }
+
+        .companion-input {
+            margin-bottom: 10px;
+        }
+
+        .companion-input input {
+            margin-bottom: 5px;
+        }
         
         @media (min-width: 768px) {
             .container {
@@ -494,7 +502,7 @@
 
         <!-- Tela do convidado (apenas para links diretos) -->
         <div id="guestView" class="hidden">
-            <a href="#" onclick="showWelcome()" class="login-link">Criar Conta</a>
+            <a href="#" onclick="showLogin()" class="login-link">Entrar</a>
             <div class="card">
                 <img id="eventCover" class="cover-image hidden" alt="Capa do evento">
                 <h1 id="eventTitle" class="text-center"></h1>
@@ -548,16 +556,20 @@
                     <div id="companionsSection" class="hidden">
                         <div class="form-group">
                             <label>Número de acompanhantes</label>
-                            <select id="companions">
+                            <select id="companions" onchange="updateCompanionNames()">
                                 <option value="0">Apenas eu</option>
                             </select>
+                        </div>
+                        <div id="companionNamesSection" class="hidden">
+                            <label>Nomes dos acompanhantes</label>
+                            <div id="companionInputs"></div>
                         </div>
                     </div>
                     
                     <button class="btn btn-primary" onclick="submitGuestResponse()">Confirmar Resposta</button>
                 </div>
                 
-                <div id="responseConfirmed" class="hidden">
+                <div id="responseConfirmed" class="hidden text-center">
                     <div class="alert alert-success">
                         <h3 id="confirmationTitle">Presença confirmada</h3>
                         <p id="confirmationMessage">Obrigado!</p>
@@ -581,7 +593,8 @@
                 </div>
                 <button class="btn btn-primary" onclick="login()">Entrar</button>
                 <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
-                <button class="btn btn-secondary" onclick="showWelcome()">Voltar</button>
+                <button class="btn btn-secondary" onclick="backToGuest()" id="backToGuestBtn" style="display: none;">Voltar ao Convite</button>
+                <button class="btn btn-secondary" onclick="showWelcome()" id="backToWelcomeBtn">Voltar</button>
             </div>
         </div>
 
@@ -651,13 +664,13 @@
                     <input type="text" id="eventName" placeholder="Digite o nome do evento">
                 </div>
                 <div class="form-group">
-                    <label>Data do Evento (opcional)</label>
-                    <input type="date" id="eventDate">
+                    <label>Data do Evento *</label>
+                    <input type="date" id="eventDate" required>
                     <div style="display: flex; align-items: center; margin-top: 10px;">
-                        <input type="checkbox" id="includeTime" onchange="toggleTimeInput()">
+                        <input type="checkbox" id="includeTime" onchange="toggleTimeInput()" checked>
                         <label for="includeTime" style="margin-left: 8px; margin-bottom: 0;">Incluir horário</label>
                     </div>
-                    <input type="time" id="eventTime" class="hidden" style="margin-top: 10px;">
+                    <input type="time" id="eventTime" style="margin-top: 10px;">
                 </div>
                 <div class="form-group">
                     <label>Data limite para confirmação (opcional)</label>
@@ -810,6 +823,7 @@
         let currentEvent = null;
         let editingEventId = null;
         let selectedUserId = null;
+        let isGuestMode = false;
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
@@ -818,6 +832,7 @@
             const eventCode = urlParams.get('event');
             
             if (eventCode) {
+                isGuestMode = true;
                 loadEventByCode(eventCode);
             } else {
                 showWelcome();
@@ -892,16 +907,38 @@
             }
         }
 
+        function updateCompanionNames() {
+            const companionsCount = parseInt(document.getElementById('companions').value);
+            const companionNamesSection = document.getElementById('companionNamesSection');
+            const companionInputs = document.getElementById('companionInputs');
+            
+            if (companionsCount > 0) {
+                companionNamesSection.classList.remove('hidden');
+                companionInputs.innerHTML = '';
+                
+                for (let i = 1; i <= companionsCount; i++) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'companion-input';
+                    inputDiv.innerHTML = `
+                        <input type="text" placeholder="Nome do ${i}º acompanhante" id="companion${i}">
+                    `;
+                    companionInputs.appendChild(inputDiv);
+                }
+            } else {
+                companionNamesSection.classList.add('hidden');
+            }
+        }
+
         async function submitGuestResponse() {
             const selectedAttendance = document.querySelector('input[name="attendance"]:checked');
-            const name = document.getElementById('guestName').value;
+            const name = document.getElementById('guestName').value.trim();
             
             if (!selectedAttendance) {
                 showAlert('Selecione uma opção de presença', 'error');
                 return;
             }
             
-            if (!name.trim()) {
+            if (!name) {
                 showAlert('Digite seu nome', 'error');
                 return;
             }
@@ -909,11 +946,15 @@
             const attending = selectedAttendance.value === 'yes';
             const companions = attending ? (parseInt(document.getElementById('companions').value) || 0) : 0;
 
-            // Verificar se já respondeu neste navegador
-            const existingResponseId = localStorage.getItem(`guest_${currentEvent.code}`);
-            if (existingResponseId) {
-                showAlert('Você já respondeu a este convite neste navegador', 'error');
-                return;
+            // Coletar nomes dos acompanhantes
+            let companionNames = [];
+            if (companions > 0) {
+                for (let i = 1; i <= companions; i++) {
+                    const companionName = document.getElementById(`companion${i}`).value.trim();
+                    if (companionName) {
+                        companionNames.push(companionName);
+                    }
+                }
             }
 
             // Verificar deadline se existir
@@ -923,22 +964,48 @@
             }
 
             try {
-                const { data, error } = await supabase
+                // Verificar se já existe resposta para este nome
+                const { data: existingResponse } = await supabase
                     .from('responses')
-                    .insert({
-                        event_id: currentEvent.id,
-                        guest_name: name.trim(),
-                        attending: attending,
-                        companions: companions
-                    })
-                    .select()
+                    .select('id')
+                    .eq('event_id', currentEvent.id)
+                    .eq('guest_name', name)
                     .single();
 
-                if (error) throw error;
+                let result;
+                if (existingResponse) {
+                    // Atualizar resposta existente
+                    result = await supabase
+                        .from('responses')
+                        .update({
+                            attending: attending,
+                            companions: companions,
+                            companion_names: companionNames
+                        })
+                        .eq('id', existingResponse.id)
+                        .select()
+                        .single();
+                } else {
+                    // Criar nova resposta
+                    result = await supabase
+                        .from('responses')
+                        .insert({
+                            event_id: currentEvent.id,
+                            guest_name: name,
+                            attending: attending,
+                            companions: companions,
+                            companion_names: companionNames
+                        })
+                        .select()
+                        .single();
+                }
 
-                localStorage.setItem(`guest_${currentEvent.code}`, data.id);
-                displayGuestConfirmation(data);
+                if (result.error) throw result.error;
+
+                localStorage.setItem(`guest_${currentEvent.code}`, result.data.id);
+                displayGuestConfirmation(result.data);
             } catch (error) {
+                console.error('Erro:', error);
                 showAlert('Erro ao registrar resposta', 'error');
             }
         }
@@ -952,8 +1019,12 @@
             document.getElementById('responseConfirmed').classList.remove('hidden');
             
             if (response.attending) {
-                document.getElementById('confirmationTitle').textContent = 'Presença confirmada';
-                document.getElementById('confirmationMessage').textContent = 'Obrigado!';
+                document.getElementById('confirmationTitle').textContent = 'Presença confirmada!';
+                let message = 'Obrigado pela confirmação!';
+                if (response.companions > 0) {
+                    message += ` Você confirmou ${response.companions} acompanhante${response.companions > 1 ? 's' : ''}.`;
+                }
+                document.getElementById('confirmationMessage').textContent = message;
             } else {
                 document.getElementById('confirmationTitle').textContent = 'Resposta registrada';
                 document.getElementById('confirmationMessage').textContent = 'Obrigado por responder.';
@@ -985,6 +1056,23 @@
         function showLogin() {
             hideAllViews();
             document.getElementById('loginView').classList.remove('hidden');
+            
+            // Mostrar botão "Voltar ao Convite" se estiver em modo convidado
+            if (isGuestMode) {
+                document.getElementById('backToGuestBtn').style.display = 'block';
+                document.getElementById('backToWelcomeBtn').style.display = 'none';
+            } else {
+                document.getElementById('backToGuestBtn').style.display = 'none';
+                document.getElementById('backToWelcomeBtn').style.display = 'block';
+            }
+        }
+
+        function backToGuest() {
+            if (currentEvent) {
+                displayGuestEvent();
+            } else {
+                showWelcome();
+            }
         }
 
         function showRegister() {
@@ -1038,30 +1126,25 @@
             
             document.getElementById('eventTitle').textContent = currentEvent.name;
             
-            // Formatação da data (se existir)
-            if (currentEvent.date) {
-                const eventDate = new Date(currentEvent.date);
-                const includeTime = currentEvent.include_time !== false;
-                const dateOptions = { 
-                    year: 'numeric', 
-                    month: '2-digit', 
-                    day: '2-digit'
-                };
-                
-                let dateText = eventDate.toLocaleDateString('pt-BR', dateOptions);
-                if (includeTime) {
-                    dateText += ', ' + eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                }
-                document.getElementById('eventDate').textContent = `Data: ${dateText}`;
-                document.getElementById('eventDateContainer').classList.remove('hidden');
-                
-                // Mostrar countdown apenas se há data
-                document.getElementById('countdownContainer').classList.remove('hidden');
-                startCountdown();
-            } else {
-                document.getElementById('eventDateContainer').classList.add('hidden');
-                document.getElementById('countdownContainer').classList.add('hidden');
+            // Formatação da data (obrigatória agora)
+            const eventDate = new Date(currentEvent.date);
+            const includeTime = currentEvent.include_time !== false;
+            const dateOptions = { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit'
+            };
+            
+            let dateText = eventDate.toLocaleDateString('pt-BR', dateOptions);
+            if (includeTime) {
+                dateText += ', ' + eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             }
+            document.getElementById('eventDate').textContent = `Data: ${dateText}`;
+            document.getElementById('eventDateContainer').classList.remove('hidden');
+            
+            // Mostrar countdown
+            document.getElementById('countdownContainer').classList.remove('hidden');
+            startCountdown();
             
             // Formatação da data limite (se existir)
             if (currentEvent.confirmation_deadline) {
@@ -1156,10 +1239,11 @@
                     .select('*')
                     .eq('username', username)
                     .eq('password', password)
+                    .eq('is_active', true)
                     .single();
 
                 if (error || !user) {
-                    showAlert('Nome de usuário ou senha incorretos', 'error');
+                    showAlert('Nome de usuário ou senha incorretos, ou conta desativada', 'error');
                     return;
                 }
 
@@ -1391,13 +1475,18 @@
                     const eventCard = document.createElement('div');
                     eventCard.className = 'event-card';
                     
-                    let dateDisplay = 'Data não definida';
-                    if (event.date) {
-                        try {
-                            dateDisplay = new Date(event.date).toLocaleString('pt-BR');
-                        } catch (e) {
-                            dateDisplay = 'Data inválida';
-                        }
+                    // Data é obrigatória agora
+                    const eventDate = new Date(event.date);
+                    const includeTime = event.include_time !== false;
+                    const dateOptions = { 
+                        year: 'numeric', 
+                        month: '2-digit', 
+                        day: '2-digit'
+                    };
+                    
+                    let dateDisplay = eventDate.toLocaleDateString('pt-BR', dateOptions);
+                    if (includeTime) {
+                        dateDisplay += ', ' + eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                     }
                     
                     eventCard.innerHTML = `
@@ -1435,21 +1524,18 @@
             document.getElementById('detailEventTitle').textContent = event.name;
             document.getElementById('eventCodeDisplay').textContent = event.code;
             
-            // Formatação da data
-            let dateDisplay = 'Data não definida';
-            if (event.date) {
-                const eventDate = new Date(event.date);
-                const includeTime = event.include_time !== false;
-                const dateOptions = { 
-                    year: 'numeric', 
-                    month: '2-digit', 
-                    day: '2-digit'
-                };
-                
-                dateDisplay = eventDate.toLocaleDateString('pt-BR', dateOptions);
-                if (includeTime) {
-                    dateDisplay += ', ' + eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                }
+            // Formatação da data (obrigatória)
+            const eventDate = new Date(event.date);
+            const includeTime = event.include_time !== false;
+            const dateOptions = { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit'
+            };
+            
+            let dateDisplay = eventDate.toLocaleDateString('pt-BR', dateOptions);
+            if (includeTime) {
+                dateDisplay += ', ' + eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             }
             document.getElementById('eventDateDisplay').textContent = dateDisplay;
             
@@ -1459,7 +1545,7 @@
             // Calcular estatísticas
             const confirmed = responses.filter(r => r.attending);
             const declined = responses.filter(r => !r.attending);
-            const totalCompanions = confirmed.reduce((sum, r) => sum + r.companions, 0);
+            const totalCompanions = confirmed.reduce((sum, r) => sum + (r.companions || 0), 0);
             const totalPeople = confirmed.length + totalCompanions;
 
             document.getElementById('totalConfirmed').textContent = confirmed.length;
@@ -1476,10 +1562,19 @@
                 responses.forEach(response => {
                     const responseItem = document.createElement('div');
                     responseItem.className = 'user-item';
+                    
+                    let companionInfo = '';
+                    if (response.companions > 0) {
+                        companionInfo = ` • ${response.companions} acompanhante${response.companions > 1 ? 's' : ''}`;
+                        if (response.companion_names && response.companion_names.length > 0) {
+                            companionInfo += ` (${response.companion_names.join(', ')})`;
+                        }
+                    }
+                    
                     responseItem.innerHTML = `
                         <div class="user-info">
                             <div class="user-name">${response.guest_name}</div>
-                            <div class="user-phone">${response.attending ? 'Confirmou presença' : 'Não comparecerá'}${response.companions > 0 ? ` • ${response.companions} acompanhante(s)` : ''}</div>
+                            <div class="user-phone">${response.attending ? 'Confirmou presença' : 'Não comparecerá'}${companionInfo}</div>
                             <div class="text-small" style="color: #999;">${new Date(response.created_at).toLocaleString('pt-BR')}</div>
                         </div>
                         <div class="user-actions">
@@ -1503,13 +1598,13 @@
             document.getElementById('confirmationTime').value = '';
             document.getElementById('maxConfirmations').value = '';
             document.getElementById('maxCompanions').value = '1';
-            document.getElementById('includeTime').checked = false;
+            document.getElementById('includeTime').checked = true;
             document.getElementById('includeConfirmTime').checked = false;
             document.getElementById('enableCover').checked = false;
             document.getElementById('allowCompanions').checked = false;
             document.getElementById('coverImage').value = '';
             document.getElementById('imagePreview').classList.add('hidden');
-            document.getElementById('eventTime').classList.add('hidden');
+            document.getElementById('eventTime').classList.remove('hidden');
             document.getElementById('confirmationTime').classList.add('hidden');
             document.getElementById('coverUploadSection').classList.add('hidden');
             document.getElementById('companionsInputSection').classList.add('hidden');
@@ -1529,13 +1624,18 @@
 
         async function saveEvent() {
             const name = document.getElementById('eventName').value.trim();
+            const eventDate = document.getElementById('eventDate').value;
             
             if (!name) {
-                showAlert('Digite pelo menos o nome do evento', 'error');
+                showAlert('Digite o nome do evento', 'error');
                 return;
             }
 
-            const eventDate = document.getElementById('eventDate').value;
+            if (!eventDate) {
+                showAlert('A data do evento é obrigatória', 'error');
+                return;
+            }
+
             const eventTime = document.getElementById('eventTime').value;
             const includeTime = document.getElementById('includeTime').checked;
             
@@ -1548,14 +1648,12 @@
             const allowCompanions = document.getElementById('allowCompanions').checked;
             const maxCompanions = allowCompanions ? (parseInt(document.getElementById('maxCompanions').value) || 1) : 0;
 
-            // Construir data do evento (opcional)
-            let fullEventDate = null;
-            if (eventDate) {
-                if (includeTime && eventTime) {
-                    fullEventDate = eventDate + 'T' + eventTime + ':00';
-                } else {
-                    fullEventDate = eventDate + 'T12:00:00';
-                }
+            // Construir data do evento (obrigatória)
+            let fullEventDate;
+            if (includeTime && eventTime) {
+                fullEventDate = eventDate + 'T' + eventTime + ':00';
+            } else {
+                fullEventDate = eventDate + 'T12:00:00';
             }
 
             // Construir data limite (opcional)
@@ -1658,16 +1756,14 @@
 
             document.getElementById('eventName').value = currentEvent.name;
             
-            // Preencher data do evento (se existir)
-            if (currentEvent.date) {
-                const eventDate = new Date(currentEvent.date);
-                document.getElementById('eventDate').value = eventDate.toISOString().split('T')[0];
-                
-                if (currentEvent.include_time) {
-                    document.getElementById('includeTime').checked = true;
-                    document.getElementById('eventTime').classList.remove('hidden');
-                    document.getElementById('eventTime').value = eventDate.toTimeString().slice(0, 5);
-                }
+            // Preencher data do evento (obrigatória)
+            const eventDate = new Date(currentEvent.date);
+            document.getElementById('eventDate').value = eventDate.toISOString().split('T')[0];
+            
+            if (currentEvent.include_time) {
+                document.getElementById('includeTime').checked = true;
+                document.getElementById('eventTime').classList.remove('hidden');
+                document.getElementById('eventTime').value = eventDate.toTimeString().slice(0, 5);
             }
             
             // Preencher data limite (se existir)
@@ -1726,7 +1822,7 @@
         // Admin functions
         async function loadAdminData() {
             // Carregar estatísticas
-            const { data: users } = await supabase.from('users').select('*');
+            const { data: users } = await supabase.from('users').select('*').eq('is_active', true);
             const { data: events } = await supabase.from('events').select('*');
 
             document.getElementById('totalUsers').textContent = users.length;
@@ -1767,12 +1863,13 @@
                 userCard.className = 'user-item';
                 userCard.innerHTML = `
                     <div class="user-info">
-                        <div class="user-name">${user.name}</div>
+                        <div class="user-name">${user.name} ${!user.is_active ? '(Desativado)' : ''}</div>
                         <div class="user-phone">${user.phone}</div>
                     </div>
                     <div class="user-actions">
                         <button class="btn btn-secondary btn-small" onclick="viewUserDetails('${user.id}')">Ver</button>
                         <button class="btn btn-secondary btn-small" onclick="loginAsUser('${user.id}')">Entrar</button>
+                        <button class="btn btn-warning btn-small" onclick="toggleUserStatus('${user.id}', ${user.is_active})">${user.is_active ? 'Desativar' : 'Ativar'}</button>
                         <button class="btn btn-danger btn-small" onclick="deleteUser('${user.id}')">Excluir</button>
                     </div>
                 `;
@@ -1787,9 +1884,17 @@
                 const eventCard = document.createElement('div');
                 eventCard.className = 'event-card';
                 
-                let dateDisplay = 'Data não definida';
-                if (event.date) {
-                    dateDisplay = new Date(event.date).toLocaleString('pt-BR');
+                const eventDate = new Date(event.date);
+                const includeTime = event.include_time !== false;
+                const dateOptions = { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit'
+                };
+                
+                let dateDisplay = eventDate.toLocaleDateString('pt-BR', dateOptions);
+                if (includeTime) {
+                    dateDisplay += ', ' + eventDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 }
                 
                 eventCard.innerHTML = `
@@ -1828,6 +1933,19 @@
             loadAdminData();
         }
 
+        async function toggleUserStatus(userId, currentStatus) {
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'ativado' : 'desativado';
+            
+            await supabase
+                .from('users')
+                .update({ is_active: newStatus })
+                .eq('id', userId);
+            
+            showAlert(`Usuário ${action}!`, 'success');
+            loadAdminData();
+        }
+
         async function viewUserDetails(userId) {
             const { data: user } = await supabase
                 .from('users')
@@ -1845,6 +1963,7 @@
                     <strong>Senha atual:</strong> ${user.password}
                 </div>
                 <p><strong>Status:</strong> ${user.status}</p>
+                <p><strong>Ativo:</strong> ${user.is_active ? 'Sim' : 'Não'}</p>
                 <p><strong>Criado em:</strong> ${new Date(user.created_at).toLocaleString('pt-BR')}</p>
             `;
             
@@ -2012,7 +2131,7 @@
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(12);
             const eventName = currentEvent.name || 'Sem nome';
-            const eventDate = currentEvent.date ? new Date(currentEvent.date).toLocaleString('pt-BR') : 'Data não definida';
+            const eventDate = new Date(currentEvent.date).toLocaleString('pt-BR');
             const eventCode = currentEvent.code || 'Sem código';
             
             doc.text(`Nome: ${eventName}`, 20, 75);
@@ -2119,6 +2238,15 @@
                         doc.text(companions, 155, yPosition);
                     }
                     
+                    // Nomes dos acompanhantes (se houver)
+                    if (response.companion_names && response.companion_names.length > 0) {
+                        doc.setFontSize(9);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Nomes: ${response.companion_names.join(', ')}`, 30, yPosition + 6);
+                        doc.setFontSize(11);
+                        yPosition += 6;
+                    }
+                    
                     // Data (linha seguinte, menor)
                     doc.setFontSize(9);
                     doc.setTextColor(100, 100, 100);
@@ -2166,5 +2294,5 @@
             loadEvent();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974cfd3981f077dd',t:'MTc1NjE0NDgyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974d23c3754177e3',t:'MTc1NjE0NjQwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
