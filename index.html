@@ -1815,6 +1815,17 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
+                // Function to clean text for PDF
+                function cleanText(text) {
+                    if (!text) return '';
+                    return text.toString()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                        .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
+                        .replace(/[^\w\s\-.,!?()]/g, '') // Keep only safe characters
+                        .trim();
+                }
+
                 // Colors
                 const primaryColor = [102, 126, 234]; // #667eea
                 const secondaryColor = [118, 75, 162]; // #764ba2
@@ -1829,13 +1840,13 @@
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(24);
                 doc.setFont('helvetica', 'bold');
-                doc.text('📊 RELATÓRIO DO EVENTO', 20, 25);
+                doc.text('RELATORIO DO EVENTO', 20, 25);
 
                 // Event title
                 doc.setTextColor(0, 0, 0);
                 doc.setFontSize(18);
                 doc.setFont('helvetica', 'bold');
-                doc.text(event.name, 20, 55);
+                doc.text(cleanText(event.name), 20, 55);
 
                 // Event details box
                 doc.setFillColor(248, 249, 250);
@@ -1846,9 +1857,9 @@
                 doc.setFontSize(11);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(...grayColor);
-                doc.text('📅 Data do Evento:', 20, 75);
-                doc.text('🎯 Limite de Participantes:', 20, 85);
-                doc.text('📄 Relatório gerado em:', 20, 95);
+                doc.text('Data do Evento:', 20, 75);
+                doc.text('Limite de Participantes:', 20, 85);
+                doc.text('Relatorio gerado em:', 20, 95);
 
                 doc.setTextColor(0, 0, 0);
                 doc.setFont('helvetica', 'bold');
@@ -1861,16 +1872,16 @@
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(...primaryColor);
-                doc.text('📈 ESTATÍSTICAS', 20, yPos);
+                doc.text('ESTATISTICAS', 20, yPos);
 
                 yPos += 15;
                 
                 // Stats boxes
                 const stats = [
-                    { label: '✅ Confirmados', value: `${attending.length} pessoas`, color: successColor },
-                    { label: '👥 Acompanhantes', value: `${totalCompanions} pessoas`, color: primaryColor },
-                    { label: '📊 Total Presentes', value: `${attending.length + totalCompanions} pessoas`, color: secondaryColor },
-                    { label: '❌ Não Comparecerão', value: `${notAttending.length} pessoas`, color: dangerColor }
+                    { label: 'Confirmados', value: `${attending.length} pessoas`, color: successColor },
+                    { label: 'Acompanhantes', value: `${totalCompanions} pessoas`, color: primaryColor },
+                    { label: 'Total Presentes', value: `${attending.length + totalCompanions} pessoas`, color: secondaryColor },
+                    { label: 'Nao Comparecerao', value: `${notAttending.length} pessoas`, color: dangerColor }
                 ];
 
                 stats.forEach((stat, index) => {
@@ -1898,7 +1909,7 @@
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(`✅ LISTA DE CONFIRMADOS (${attending.length})`, 20, yPos + 5);
+                    doc.text(`LISTA DE CONFIRMADOS (${attending.length})`, 20, yPos + 5);
 
                     yPos += 20;
 
@@ -1920,7 +1931,7 @@
 
                         doc.setFont('helvetica', 'bold');
                         doc.text(`${index + 1}.`, 20, yPos + 5);
-                        doc.text(response.guest_name, 30, yPos + 5);
+                        doc.text(cleanText(response.guest_name), 30, yPos + 5);
 
                         if (response.companions > 0) {
                             doc.setFont('helvetica', 'normal');
@@ -1930,7 +1941,8 @@
                             if (response.companion_names && response.companion_names.length > 0) {
                                 doc.setFontSize(8);
                                 doc.setTextColor(...grayColor);
-                                doc.text(`(${response.companion_names.join(', ')})`, 30, yPos + 10);
+                                const cleanNames = response.companion_names.map(name => cleanText(name)).join(', ');
+                                doc.text(`(${cleanNames})`, 30, yPos + 10);
                                 yPos += 5;
                             }
                         }
@@ -1955,7 +1967,7 @@
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(`❌ NÃO COMPARECERÃO (${notAttending.length})`, 20, yPos + 5);
+                    doc.text(`NAO COMPARECERAO (${notAttending.length})`, 20, yPos + 5);
 
                     yPos += 20;
 
@@ -1976,7 +1988,7 @@
 
                         doc.setFont('helvetica', 'bold');
                         doc.text(`${index + 1}.`, 20, yPos + 5);
-                        doc.text(response.guest_name, 30, yPos + 5);
+                        doc.text(cleanText(response.guest_name), 30, yPos + 5);
 
                         yPos += 12;
                     });
@@ -1992,11 +2004,12 @@
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(8);
                     doc.setFont('helvetica', 'normal');
-                    doc.text('Gerado por InvitesAO - Sistema de Confirmação de Presença', 20, 293);
-                    doc.text(`Página ${i} de ${pageCount}`, 170, 293);
+                    doc.text('Gerado por InvitesAO - Sistema de Confirmacao de Presenca', 20, 293);
+                    doc.text(`Pagina ${i} de ${pageCount}`, 170, 293);
                 }
 
-                doc.save(`relatorio-${event.name.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`);
+                const cleanFileName = cleanText(event.name).replace(/\s+/g, '-').toLowerCase() || 'evento';
+                doc.save(`relatorio-${cleanFileName}.pdf`);
             } catch (error) {
                 showNotification('Erro ao gerar relatório: ' + error.message, 'error', 'userNotification');
             }
@@ -2355,5 +2368,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974ddb9897a777e3',t:'MTc1NjE1MzkzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974df883a00577e3',t:'MTc1NjE1NTEyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
