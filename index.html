@@ -50,7 +50,7 @@
 
         .logo h1 {
             color: #667eea;
-            font-size: 2.5em;
+            font-size: 1.6em;
             font-weight: bold;
         }
 
@@ -90,6 +90,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-primary {
@@ -164,9 +168,17 @@
         .event-cover {
             width: 100%;
             height: 200px;
-            object-fit: cover;
             border-radius: 12px;
             margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+        }
+
+        .event-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .countdown {
@@ -220,22 +232,26 @@
         }
 
         .response-question {
-            font-size: 1.3em;
+            font-size: 1.1em;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #333;
         }
 
         .response-buttons {
             display: flex;
-            gap: 15px;
-            margin: 20px 0;
+            flex-direction: column;
+            gap: 12px;
+            margin: 15px 0;
         }
 
         .response-buttons .btn {
-            flex: 1;
-            font-size: 1.1em;
-            padding: 18px;
+            font-size: 1em;
+            padding: 12px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .guest-form {
@@ -247,12 +263,19 @@
 
         .deadline-text {
             text-align: center;
-            font-size: 1.1em;
+            font-size: 0.95em;
             color: #666;
-            margin: 20px 0;
-            padding: 15px;
+            margin: 15px 0;
+            padding: 12px;
             background: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
+        }
+
+        .deadline-date {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-top: 5px;
         }
 
         .footer {
@@ -271,6 +294,19 @@
         }
 
         .login-button-top .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .back-button .btn {
             padding: 8px 16px;
             font-size: 14px;
             width: auto;
@@ -407,6 +443,43 @@
             margin-bottom: 10px;
         }
 
+        .cover-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8f9fa;
+            cursor: move;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: move;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+
+        .position-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .page-title {
+            font-size: 1.3em !important;
+            margin-bottom: 20px;
+        }
+
         @media (min-width: 768px) {
             .admin-container {
                 padding: 40px;
@@ -445,6 +518,9 @@
 
         <!-- Login Screen -->
         <div id="loginView" class="container hidden">
+            <div class="back-button">
+                <button class="btn btn-secondary" onclick="backToEvent()">← Voltar</button>
+            </div>
             <div class="card">
                 <div class="logo">
                     <h1>🎉 InvitesAO</h1>
@@ -462,7 +538,6 @@
                     <button type="submit" class="btn btn-primary">Entrar</button>
                 </form>
                 <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
-                <button class="btn btn-secondary" onclick="backToEvent()">Voltar</button>
             </div>
             <div class="footer">
                 Copyright © invitesAO 2025
@@ -471,6 +546,9 @@
 
         <!-- Register Screen -->
         <div id="registerView" class="container hidden">
+            <div class="back-button">
+                <button class="btn btn-secondary" onclick="backToEvent()">← Voltar</button>
+            </div>
             <div class="card">
                 <div class="logo">
                     <h1>🎉 InvitesAO</h1>
@@ -504,6 +582,9 @@
 
         <!-- Pending Approval Screen -->
         <div id="pendingView" class="container hidden">
+            <div class="back-button">
+                <button class="btn btn-secondary" onclick="logout()">← Voltar</button>
+            </div>
             <div class="card">
                 <div class="logo">
                     <h1>🎉 InvitesAO</h1>
@@ -512,7 +593,6 @@
                     <div class="spinner"></div>
                     <h3>Aguardando Aprovação</h3>
                     <p>Sua conta foi criada com sucesso!<br>Aguarde a aprovação do administrador.</p>
-                    <button class="btn btn-secondary" onclick="logout()">Sair</button>
                 </div>
             </div>
             <div class="footer">
@@ -522,13 +602,15 @@
 
         <!-- User Dashboard -->
         <div id="userDashboard" class="container hidden">
+            <div class="back-button">
+                <button class="btn btn-secondary" onclick="logout()">← Sair</button>
+            </div>
             <div class="card">
                 <div class="logo">
-                    <h1>🎉 Meus Eventos</h1>
+                    <h1 class="page-title">Meus Eventos</h1>
                 </div>
                 <div id="userNotification"></div>
                 <button class="btn btn-primary" onclick="showCreateEvent()">Criar Novo Evento</button>
-                <button class="btn btn-secondary" onclick="logout()">Sair</button>
                 <div id="userEvents"></div>
             </div>
             <div class="footer">
@@ -538,9 +620,12 @@
 
         <!-- Create/Edit Event -->
         <div id="createEventView" class="container hidden">
+            <div class="back-button">
+                <button class="btn btn-secondary" onclick="showUserDashboard()">← Voltar</button>
+            </div>
             <div class="card">
                 <div class="logo">
-                    <h1 id="eventFormTitle">🎉 Criar Evento</h1>
+                    <h1 id="eventFormTitle" class="page-title">Criar Evento</h1>
                 </div>
                 <div id="eventNotification"></div>
                 <form id="eventForm">
@@ -571,6 +656,10 @@
                         <input type="number" id="eventLimit" min="1" required>
                     </div>
                     <div class="form-group">
+                        <label>Máximo de Acompanhantes por Convidado</label>
+                        <input type="number" id="maxCompanions" min="0" max="20" value="5">
+                    </div>
+                    <div class="form-group">
                         <label>Descrição</label>
                         <textarea id="eventDescription" rows="3"></textarea>
                     </div>
@@ -582,10 +671,22 @@
                     </div>
                     <div class="form-group hidden" id="coverUploadGroup">
                         <label>Foto de Capa</label>
-                        <input type="file" id="eventCover" accept="image/*">
+                        <input type="file" id="eventCover" accept="image/*" onchange="previewCover()">
+                        <div id="coverPreview" class="hidden" style="margin-top: 15px;">
+                            <label>Posicionar imagem (arraste para ajustar):</label>
+                            <div id="coverContainer" class="cover-container">
+                                <img id="coverImage" class="cover-image">
+                                <div class="position-indicator">
+                                    Arraste para posicionar
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
+                                <button type="button" class="btn btn-small btn-secondary" onclick="resetCoverPosition()">Centralizar</button>
+                                <small style="color: #666;">Posição: <span id="positionDisplay">50%, 50%</span></small>
+                            </div>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Salvar Evento</button>
-                    <button type="button" class="btn btn-secondary" onclick="showUserDashboard()">Cancelar</button>
                 </form>
             </div>
             <div class="footer">
@@ -595,9 +696,11 @@
 
         <!-- Admin Dashboard -->
         <div id="adminDashboard" class="admin-container hidden">
+            <div class="back-button">
+                <button class="btn btn-secondary" onclick="logout()">← Sair</button>
+            </div>
             <div class="admin-header">
                 <h1>🔧 Painel Administrativo</h1>
-                <button class="btn btn-danger btn-small" onclick="logout()">Sair</button>
             </div>
             <div id="adminNotification"></div>
             
@@ -649,6 +752,11 @@
         let editingEventId = null;
         let approvalCheckInterval = null;
         let isEventPage = false;
+        let coverPosition = { x: 50, y: 50 };
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let currentAttending = null;
+        let editingResponse = false;
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', async () => {
@@ -694,6 +802,97 @@
             document.getElementById('eventCoverEnabled').addEventListener('change', toggleCoverUpload);
             document.getElementById('eventTimeEnabled').addEventListener('change', toggleEventTime);
             document.getElementById('deadlineTimeEnabled').addEventListener('change', toggleDeadlineTime);
+        }
+
+        // Cover Image Functions
+        function previewCover() {
+            const file = document.getElementById('eventCover').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const coverImage = document.getElementById('coverImage');
+                    coverImage.src = e.target.result;
+                    document.getElementById('coverPreview').classList.remove('hidden');
+                    setupImageDragging();
+                    resetCoverPosition();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setupImageDragging() {
+            const coverImage = document.getElementById('coverImage');
+            const container = document.getElementById('coverContainer');
+
+            coverImage.addEventListener('mousedown', startDrag);
+            coverImage.addEventListener('touchstart', startDrag);
+
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                
+                dragStart.x = clientX;
+                dragStart.y = clientY;
+
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                
+                const deltaX = clientX - dragStart.x;
+                const deltaY = clientY - dragStart.y;
+
+                const containerRect = container.getBoundingClientRect();
+
+                // Calculate new position as percentage
+                const newX = coverPosition.x + (deltaX / containerRect.width) * 100;
+                const newY = coverPosition.y + (deltaY / containerRect.height) * 100;
+
+                // Constrain to bounds
+                coverPosition.x = Math.max(-50, Math.min(150, newX));
+                coverPosition.y = Math.max(-50, Math.min(150, newY));
+
+                updateImagePosition();
+                updatePositionDisplay();
+
+                dragStart.x = clientX;
+                dragStart.y = clientY;
+            }
+
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+        }
+
+        function updateImagePosition() {
+            const coverImage = document.getElementById('coverImage');
+            coverImage.style.objectPosition = `${coverPosition.x}% ${coverPosition.y}%`;
+        }
+
+        function updatePositionDisplay() {
+            document.getElementById('positionDisplay').textContent = 
+                `${Math.round(coverPosition.x)}%, ${Math.round(coverPosition.y)}%`;
+        }
+
+        function resetCoverPosition() {
+            coverPosition = { x: 50, y: 50 };
+            updateImagePosition();
+            updatePositionDisplay();
         }
 
         // Event Functions
@@ -765,7 +964,13 @@
             
             let coverHtml = '';
             if (event.cover_enabled && event.cover_url) {
-                coverHtml = `<img src="${event.cover_url}" alt="Capa do evento" class="event-cover">`;
+                const posX = event.cover_position_x || 50;
+                const posY = event.cover_position_y || 50;
+                coverHtml = `
+                    <div class="event-cover">
+                        <img src="${event.cover_url}" alt="Capa do evento" style="object-position: ${posX}% ${posY}%;">
+                    </div>
+                `;
             }
 
             let deadlineStatus = '';
@@ -779,24 +984,24 @@
             if (guestResponse) {
                 const canEdit = canEditResponse(guestResponse.created_at);
                 const statusClass = guestResponse.attending ? '' : 'negative';
-                const statusText = guestResponse.attending ? 'Presença confirmada!' : 'Você informou que não comparecerá';
+                const statusText = guestResponse.attending ? '✅ Presença confirmada!' : '❌ Você informou que não comparecerá';
                 
-                let companionsText = '';
+                let companionInfo = '';
                 if (guestResponse.attending && guestResponse.companions > 0) {
-                    companionsText = `<p><strong>Acompanhantes:</strong> ${guestResponse.companions}</p>`;
+                    companionInfo = `<p><strong>Acompanhantes:</strong> ${guestResponse.companions}</p>`;
                     if (guestResponse.companion_names && guestResponse.companion_names.length > 0) {
-                        companionsText += `<p><strong>Nomes:</strong> ${guestResponse.companion_names.join(', ')}</p>`;
+                        companionInfo += `<p><strong>Nomes:</strong> ${guestResponse.companion_names.join(', ')}</p>`;
                     }
                 }
                 
                 responseSection = `
                     <div class="response-status ${statusClass}">
                         <h3>${statusText}</h3>
-                        <p>Obrigado!</p>
                         <p><strong>Nome:</strong> ${guestResponse.guest_name}</p>
-                        ${companionsText}
+                        ${companionInfo}
+                        <p style="margin-top: 15px;">Obrigado pela confirmação!</p>
                         ${canEdit ? `
-                            <button class="btn btn-small btn-secondary" onclick="editResponse()" style="margin-top: 15px;">Editar Resposta</button>
+                            <button class="btn btn-secondary" onclick="editResponse()" style="margin-top: 20px;">Editar Resposta</button>
                             <div class="edit-timer">Você pode editar sua resposta por mais ${getRemainingEditTime(guestResponse.created_at)}</div>
                         ` : ''}
                     </div>
@@ -809,16 +1014,21 @@
                             <input type="text" id="guestName" required>
                         </div>
                         <div class="response-section">
-                            <div class="response-question">Confirma presença?</div>
-                            <div class="response-buttons">
-                                <button class="btn btn-success" onclick="respondEvent(true)">Sim</button>
-                                <button class="btn btn-danger" onclick="respondEvent(false)">Não</button>
+                            <div class="response-question">Favor confirmar presença até</div>
+                            <div class="deadline-date">${formatEventDate(deadline, event.deadline_time_enabled)}</div>
+                            <div class="response-buttons" style="margin-top: 20px;">
+                                <button class="btn btn-danger" onclick="respondEvent(false)">
+                                    ⚫ Não
+                                </button>
+                                <button class="btn btn-success" onclick="respondEvent(true)">
+                                    ⚫ Sim
+                                </button>
                             </div>
                         </div>
                         <div class="form-group companions-input hidden" id="companionsGroup">
-                            <label>Número de acompanhantes</label>
-                            <input type="number" id="companions" min="0" max="10" value="0" onchange="updateCompanionNames()">
-                            <div id="companionNames" class="companions-names"></div>
+                            <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                                Este evento permite até ${event.max_companions || 5} acompanhante(s) por pessoa.
+                            </p>
                         </div>
                         <div id="responseButtons" class="hidden">
                             <button class="btn btn-primary" onclick="submitResponse()">Confirmar</button>
@@ -829,7 +1039,6 @@
             }
 
             const eventDateFormatted = formatEventDate(eventDate, event.time_enabled);
-            const deadlineFormatted = formatEventDate(deadline, event.deadline_time_enabled);
 
             document.getElementById('guestContent').innerHTML = `
                 ${coverHtml}
@@ -840,10 +1049,6 @@
                 ${event.description ? `<p style="margin-bottom: 20px; text-align: center; color: #666;">${event.description}</p>` : ''}
                 
                 <div class="countdown" id="countdown"></div>
-                
-                <div class="deadline-text">
-                    Favor confirmar presença até<br><strong>${deadlineFormatted}</strong>
-                </div>
                 
                 ${deadlineStatus}
                 ${responseSection}
@@ -898,22 +1103,8 @@
             setInterval(updateCountdown, 1000);
         }
 
-        let currentAttending = null;
-
         function updateCompanionNames() {
-            const count = parseInt(document.getElementById('companions').value) || 0;
-            const container = document.getElementById('companionNames');
-            
-            let html = '';
-            for (let i = 0; i < count; i++) {
-                html += `
-                    <div class="form-group">
-                        <label>Nome do acompanhante ${i + 1}</label>
-                        <input type="text" id="companion${i}" placeholder="Nome completo">
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
+            // Função removida - acompanhantes são definidos pelo organizador
         }
 
         function respondEvent(attending) {
@@ -924,44 +1115,93 @@
             }
 
             currentAttending = attending;
-            if (attending) {
+            if (attending && currentEvent.max_companions > 0) {
                 document.getElementById('companionsGroup').classList.remove('hidden');
-                updateCompanionNames();
+                updateCompanionInputs();
             } else {
                 document.getElementById('companionsGroup').classList.add('hidden');
             }
             document.getElementById('responseButtons').classList.remove('hidden');
         }
 
+        function updateCompanionInputs() {
+            const maxCompanions = currentEvent.max_companions || 0;
+            if (maxCompanions === 0) return;
+
+            const companionsGroup = document.getElementById('companionsGroup');
+            const existingInputs = companionsGroup.querySelector('.companions-names');
+            
+            if (existingInputs) {
+                existingInputs.remove();
+            }
+
+            const companionsHtml = `
+                <div class="companions-names">
+                    <label>Quantos acompanhantes você trará? (máximo ${maxCompanions})</label>
+                    <select id="companionCount" onchange="updateCompanionNameInputs()" style="margin-bottom: 15px;">
+                        <option value="0">Nenhum acompanhante</option>
+                        ${Array.from({length: maxCompanions}, (_, i) => 
+                            `<option value="${i + 1}">${i + 1} acompanhante${i > 0 ? 's' : ''}</option>`
+                        ).join('')}
+                    </select>
+                    <div id="companionNameInputs"></div>
+                </div>
+            `;
+            
+            companionsGroup.insertAdjacentHTML('beforeend', companionsHtml);
+        }
+
+        function updateCompanionNameInputs() {
+            const count = parseInt(document.getElementById('companionCount').value);
+            const container = document.getElementById('companionNameInputs');
+            
+            if (count === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div style="margin-top: 15px;"><label>Nome dos acompanhantes:</label>';
+            for (let i = 0; i < count; i++) {
+                html += `<input type="text" id="companion${i}" placeholder="Nome do ${i + 1}º acompanhante" style="margin-bottom: 10px;">`;
+            }
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
         async function submitResponse() {
             const guestName = document.getElementById('guestName').value.trim();
-            const companions = currentAttending ? parseInt(document.getElementById('companions').value) || 0 : 0;
 
             if (!guestName) {
                 showNotification('Por favor, informe seu nome.', 'error');
                 return;
             }
 
-            // Get companion names
+            let companions = 0;
             let companionNames = [];
-            if (currentAttending && companions > 0) {
-                for (let i = 0; i < companions; i++) {
-                    const companionInput = document.getElementById(`companion${i}`);
-                    if (companionInput && companionInput.value.trim()) {
-                        companionNames.push(companionInput.value.trim());
+
+            if (currentAttending && currentEvent.max_companions > 0) {
+                const companionCountElement = document.getElementById('companionCount');
+                if (companionCountElement) {
+                    companions = parseInt(companionCountElement.value) || 0;
+                    
+                    // Collect companion names
+                    for (let i = 0; i < companions; i++) {
+                        const nameInput = document.getElementById(`companion${i}`);
+                        if (nameInput && nameInput.value.trim()) {
+                            companionNames.push(nameInput.value.trim());
+                        }
+                    }
+
+                    // Validate that all companion names are provided
+                    if (companions > 0 && companionNames.length !== companions) {
+                        showNotification('Por favor, informe o nome de todos os acompanhantes.', 'error');
+                        return;
                     }
                 }
             }
 
             try {
-                // Check if user already responded and update instead of insert
-                const existingResponse = await supabase
-                    .from('responses')
-                    .select('*')
-                    .eq('event_id', currentEvent.id)
-                    .eq('guest_name', guestName)
-                    .single();
-
                 const responseData = {
                     event_id: currentEvent.id,
                     guest_name: guestName,
@@ -971,39 +1211,48 @@
                     created_at: new Date().toISOString()
                 };
 
-                let error;
-                if (existingResponse.data) {
+                if (editingResponse) {
                     // Update existing response
-                    const { error: updateError } = await supabase
+                    const { error } = await supabase
                         .from('responses')
                         .update(responseData)
-                        .eq('id', existingResponse.data.id);
-                    error = updateError;
+                        .eq('event_id', currentEvent.id)
+                        .eq('guest_name', guestName);
+                    
+                    if (error) throw error;
+                    editingResponse = false;
                 } else {
                     // Insert new response
-                    const { error: insertError } = await supabase
+                    const { error } = await supabase
                         .from('responses')
                         .insert([responseData]);
-                    error = insertError;
+                    
+                    if (error) throw error;
                 }
-
-                if (error) throw error;
 
                 // Save to localStorage
                 const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
                 responses[currentEvent.id] = responseData;
                 localStorage.setItem('eventResponses', JSON.stringify(responses));
 
-                const message = currentAttending 
-                    ? `🎉 Obrigado, ${guestName}! Sua presença foi confirmada${companions > 0 ? ` com ${companions} acompanhante(s)` : ''}.`
+                let message = currentAttending 
+                    ? `🎉 Obrigado, ${guestName}! Sua presença foi confirmada.`
                     : `😔 Obrigado por avisar, ${guestName}. Sentiremos sua falta!`;
+
+                if (currentAttending && companions > 0) {
+                    message += ` Você confirmou ${companions} acompanhante${companions > 1 ? 's' : ''}.`;
+                }
 
                 showNotification(message, 'success');
                 setTimeout(() => {
                     renderGuestEvent(currentEvent);
                 }, 2000);
             } catch (error) {
-                showNotification('Erro ao salvar resposta: ' + error.message, 'error');
+                if (error.code === '23505') {
+                    showNotification('Você já respondeu a este evento. Use a opção "Editar Resposta" se disponível.', 'error');
+                } else {
+                    showNotification('Erro ao salvar resposta: ' + error.message, 'error');
+                }
             }
         }
 
@@ -1011,6 +1260,7 @@
             document.getElementById('responseButtons').classList.add('hidden');
             document.getElementById('companionsGroup').classList.add('hidden');
             currentAttending = null;
+            editingResponse = false;
         }
 
         function getGuestResponse(eventId) {
@@ -1042,14 +1292,79 @@
         function editResponse() {
             const response = getGuestResponse(currentEvent.id);
             if (response && canEditResponse(response.created_at)) {
-                document.getElementById('guestName').value = response.guest_name;
-                document.getElementById('companions').value = response.companions;
-                currentAttending = response.attending;
-                
-                if (response.attending) {
-                    document.getElementById('companionsGroup').classList.remove('hidden');
+                // Clear the current form and show the edit form
+                const guestNameInput = document.getElementById('guestName');
+                if (guestNameInput) {
+                    guestNameInput.value = response.guest_name;
                 }
-                document.getElementById('responseButtons').classList.remove('hidden');
+                
+                currentAttending = response.attending;
+                editingResponse = true;
+                
+                // Show the form again
+                const responseSection = `
+                    <div class="guest-form">
+                        <div class="form-group">
+                            <label>Seu nome completo</label>
+                            <input type="text" id="guestName" value="${response.guest_name}" required>
+                        </div>
+                        <div class="response-section">
+                            <div class="response-question">Favor confirmar presença até</div>
+                            <div class="deadline-date">${formatEventDate(new Date(currentEvent.deadline), currentEvent.deadline_time_enabled)}</div>
+                            <div class="response-buttons" style="margin-top: 20px;">
+                                <button class="btn btn-danger" onclick="respondEvent(false)">
+                                    ⚫ Não
+                                </button>
+                                <button class="btn btn-success" onclick="respondEvent(true)">
+                                    ⚫ Sim
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group companions-input hidden" id="companionsGroup">
+                            <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                                Este evento permite até ${currentEvent.max_companions || 5} acompanhante(s) por pessoa.
+                            </p>
+                        </div>
+                        <div id="responseButtons" class="hidden">
+                            <button class="btn btn-primary" onclick="submitResponse()">Confirmar Alteração</button>
+                            <button class="btn btn-secondary" onclick="cancelResponse()">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Find the response status div and replace it
+                const responseStatusDiv = document.querySelector('.response-status');
+                if (responseStatusDiv) {
+                    responseStatusDiv.outerHTML = responseSection;
+                }
+                
+                // Pre-select the current response
+                setTimeout(() => {
+                    respondEvent(response.attending);
+                    
+                    // If there were companions, restore them
+                    if (response.attending && response.companions > 0) {
+                        setTimeout(() => {
+                            const companionCountSelect = document.getElementById('companionCount');
+                            if (companionCountSelect) {
+                                companionCountSelect.value = response.companions;
+                                updateCompanionNameInputs();
+                                
+                                // Fill in companion names
+                                setTimeout(() => {
+                                    if (response.companion_names && response.companion_names.length > 0) {
+                                        response.companion_names.forEach((name, index) => {
+                                            const input = document.getElementById(`companion${index}`);
+                                            if (input) {
+                                                input.value = name;
+                                            }
+                                        });
+                                    }
+                                }, 100);
+                            }
+                        }, 100);
+                    }
+                }, 100);
             }
         }
 
@@ -1222,7 +1537,7 @@
                         <div class="event-card">
                             <h3>${event.name} <span class="btn btn-small btn-${statusClass}" style="font-size: 10px; padding: 2px 8px;">${statusText}</span></h3>
                             <p><strong>Data:</strong> ${event.event_date ? formatEventDate(new Date(event.event_date), event.time_enabled) : 'Data não definida'}</p>
-                            <p><strong>Confirmações:</strong> ${confirmedCount}/${event.limit}</p>
+                            <p><strong>Confirmações:</strong> ${confirmedCount}/${event.event_limit}</p>
                             <p><strong>Total de respostas:</strong> ${responseCount}</p>
                             <p><strong>Link:</strong> <a href="${eventUrl}" target="_blank" style="word-break: break-all; font-size: 12px;">${eventUrl}</a></p>
                             <div style="margin-top: 15px;">
@@ -1269,9 +1584,12 @@
                 deadline: deadlineDateTime,
                 time_enabled: document.getElementById('eventTimeEnabled').checked,
                 deadline_time_enabled: document.getElementById('deadlineTimeEnabled').checked,
-                limit: parseInt(document.getElementById('eventLimit').value),
+                event_limit: parseInt(document.getElementById('eventLimit').value),
+                max_companions: parseInt(document.getElementById('maxCompanions').value),
                 description: document.getElementById('eventDescription').value,
                 cover_enabled: document.getElementById('eventCoverEnabled').checked,
+                cover_position_x: coverPosition.x,
+                cover_position_y: coverPosition.y,
                 user_id: currentUser.id
             };
 
@@ -1337,7 +1655,7 @@
                 if (error) throw error;
 
                 editingEventId = eventId;
-                document.getElementById('eventFormTitle').textContent = '✏️ Editar Evento';
+                document.getElementById('eventFormTitle').textContent = 'Editar Evento';
                 document.getElementById('eventName').value = event.name;
                 
                 const eventDate = new Date(event.event_date);
@@ -1354,9 +1672,16 @@
                     document.getElementById('deadlineTime').value = deadlineDate.toTimeString().slice(0, 5);
                 }
 
-                document.getElementById('eventLimit').value = event.limit;
+                document.getElementById('eventLimit').value = event.event_limit;
+                document.getElementById('maxCompanions').value = event.max_companions || 5;
                 document.getElementById('eventDescription').value = event.description || '';
                 document.getElementById('eventCoverEnabled').checked = event.cover_enabled;
+                
+                // Set cover position
+                if (event.cover_position_x !== undefined && event.cover_position_y !== undefined) {
+                    coverPosition.x = event.cover_position_x;
+                    coverPosition.y = event.cover_position_y;
+                }
                 
                 toggleCoverUpload();
                 toggleEventTime();
@@ -1429,7 +1754,7 @@
                         <p><strong>Confirmados:</strong> ${attending.length} pessoas + ${totalCompanions} acompanhantes = ${attending.length + totalCompanions} total</p>
                         <p><strong>Não comparecerão:</strong> ${notAttending.length}</p>
                         <p><strong>Total de respostas:</strong> ${responses.length}</p>
-                        <p><strong>Limite do evento:</strong> ${event.limit}</p>
+                        <p><strong>Limite do evento:</strong> ${event.event_limit}</p>
                         
                         <h4 style="margin-top: 20px; color: #28a745;">✅ Confirmados (${attending.length})</h4>
                         <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
@@ -1490,63 +1815,185 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                // Header
-                doc.setFontSize(20);
-                doc.text('Relatório do Evento', 20, 30);
+                // Colors
+                const primaryColor = [102, 126, 234]; // #667eea
+                const secondaryColor = [118, 75, 162]; // #764ba2
+                const successColor = [40, 167, 69]; // #28a745
+                const dangerColor = [220, 53, 69]; // #dc3545
+                const grayColor = [108, 117, 125]; // #6c757d
+
+                // Header with gradient effect
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, 210, 40, 'F');
                 
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.text('📊 RELATÓRIO DO EVENTO', 20, 25);
+
+                // Event title
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text(event.name, 20, 55);
+
+                // Event details box
+                doc.setFillColor(248, 249, 250);
+                doc.rect(15, 65, 180, 35, 'F');
+                doc.setDrawColor(...grayColor);
+                doc.rect(15, 65, 180, 35, 'S');
+
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...grayColor);
+                doc.text('📅 Data do Evento:', 20, 75);
+                doc.text('🎯 Limite de Participantes:', 20, 85);
+                doc.text('📄 Relatório gerado em:', 20, 95);
+
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'bold');
+                doc.text(formatEventDate(new Date(event.event_date), event.time_enabled), 70, 75);
+                doc.text(`${event.event_limit} pessoas`, 85, 85);
+                doc.text(formatDate(new Date()), 75, 95);
+
+                // Statistics section
+                let yPos = 120;
                 doc.setFontSize(16);
-                doc.text(event.name, 20, 50);
-                
-                doc.setFontSize(12);
-                doc.text(`Data do Evento: ${formatEventDate(new Date(event.event_date), event.time_enabled)}`, 20, 70);
-                doc.text(`Limite: ${event.limit} pessoas`, 20, 80);
-                doc.text(`Gerado em: ${formatDate(new Date())}`, 20, 90);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...primaryColor);
+                doc.text('📈 ESTATÍSTICAS', 20, yPos);
 
-                // Summary
-                doc.setFontSize(14);
-                doc.text('Resumo:', 20, 110);
-                doc.setFontSize(12);
-                doc.text(`Confirmados: ${attending.length} pessoas + ${totalCompanions} acompanhantes = ${attending.length + totalCompanions} total`, 20, 125);
-                doc.text(`Não comparecerão: ${notAttending.length}`, 20, 135);
-                doc.text(`Total de respostas: ${responses.length}`, 20, 145);
-
-                // Confirmed list
-                let yPos = 165;
-                doc.setFontSize(14);
-                doc.text('Lista de Confirmados:', 20, yPos);
                 yPos += 15;
+                
+                // Stats boxes
+                const stats = [
+                    { label: '✅ Confirmados', value: `${attending.length} pessoas`, color: successColor },
+                    { label: '👥 Acompanhantes', value: `${totalCompanions} pessoas`, color: primaryColor },
+                    { label: '📊 Total Presentes', value: `${attending.length + totalCompanions} pessoas`, color: secondaryColor },
+                    { label: '❌ Não Comparecerão', value: `${notAttending.length} pessoas`, color: dangerColor }
+                ];
 
-                doc.setFontSize(10);
-                attending.forEach((response, index) => {
-                    if (yPos > 270) {
-                        doc.addPage();
-                        yPos = 30;
-                    }
-                    const text = `${index + 1}. ${response.guest_name}${response.companions > 0 ? ` + ${response.companions} acompanhante(s)` : ''}`;
-                    doc.text(text, 20, yPos);
-                    yPos += 10;
+                stats.forEach((stat, index) => {
+                    const x = 20 + (index % 2) * 90;
+                    const y = yPos + Math.floor(index / 2) * 25;
+                    
+                    doc.setFillColor(...stat.color);
+                    doc.rect(x, y, 80, 20, 'F');
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(stat.label, x + 3, y + 8);
+                    doc.setFontSize(11);
+                    doc.text(stat.value, x + 3, y + 16);
                 });
 
-                // Not attending list
+                yPos += 65;
+
+                // Confirmed attendees section
+                if (attending.length > 0) {
+                    doc.setFillColor(...successColor);
+                    doc.rect(15, yPos - 5, 180, 15, 'F');
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`✅ LISTA DE CONFIRMADOS (${attending.length})`, 20, yPos + 5);
+
+                    yPos += 20;
+
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+
+                    attending.forEach((response, index) => {
+                        if (yPos > 270) {
+                            doc.addPage();
+                            yPos = 30;
+                        }
+
+                        // Alternating row colors
+                        if (index % 2 === 0) {
+                            doc.setFillColor(248, 249, 250);
+                            doc.rect(15, yPos - 3, 180, 12, 'F');
+                        }
+
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${index + 1}.`, 20, yPos + 5);
+                        doc.text(response.guest_name, 30, yPos + 5);
+
+                        if (response.companions > 0) {
+                            doc.setFont('helvetica', 'normal');
+                            doc.setTextColor(...primaryColor);
+                            doc.text(`+ ${response.companions} acompanhante${response.companions > 1 ? 's' : ''}`, 120, yPos + 5);
+                            
+                            if (response.companion_names && response.companion_names.length > 0) {
+                                doc.setFontSize(8);
+                                doc.setTextColor(...grayColor);
+                                doc.text(`(${response.companion_names.join(', ')})`, 30, yPos + 10);
+                                yPos += 5;
+                            }
+                        }
+
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(10);
+                        yPos += 15;
+                    });
+                }
+
+                // Not attending section
                 if (notAttending.length > 0) {
                     yPos += 10;
                     if (yPos > 250) {
                         doc.addPage();
                         yPos = 30;
                     }
-                    doc.setFontSize(14);
-                    doc.text('Não comparecerão:', 20, yPos);
-                    yPos += 15;
 
+                    doc.setFillColor(...dangerColor);
+                    doc.rect(15, yPos - 5, 180, 15, 'F');
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`❌ NÃO COMPARECERÃO (${notAttending.length})`, 20, yPos + 5);
+
+                    yPos += 20;
+
+                    doc.setTextColor(0, 0, 0);
                     doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+
                     notAttending.forEach((response, index) => {
                         if (yPos > 270) {
                             doc.addPage();
                             yPos = 30;
                         }
-                        doc.text(`${index + 1}. ${response.guest_name}`, 20, yPos);
-                        yPos += 10;
+
+                        if (index % 2 === 0) {
+                            doc.setFillColor(248, 249, 250);
+                            doc.rect(15, yPos - 3, 180, 10, 'F');
+                        }
+
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${index + 1}.`, 20, yPos + 5);
+                        doc.text(response.guest_name, 30, yPos + 5);
+
+                        yPos += 12;
                     });
+                }
+
+                // Footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFillColor(...grayColor);
+                    doc.rect(0, 287, 210, 10, 'F');
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Gerado por InvitesAO - Sistema de Confirmação de Presença', 20, 293);
+                    doc.text(`Página ${i} de ${pageCount}`, 170, 293);
                 }
 
                 doc.save(`relatorio-${event.name.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`);
@@ -1815,10 +2262,13 @@
             hideAllViews();
             document.getElementById('createEventView').classList.remove('hidden');
             if (!editingEventId) {
-                document.getElementById('eventFormTitle').textContent = '🎉 Criar Evento';
+                document.getElementById('eventFormTitle').textContent = 'Criar Evento';
                 document.getElementById('eventForm').reset();
                 document.getElementById('eventTimeEnabled').checked = false;
                 document.getElementById('deadlineTimeEnabled').checked = false;
+                document.getElementById('coverPreview').classList.add('hidden');
+                document.getElementById('maxCompanions').value = 5;
+                coverPosition = { x: 50, y: 50 };
                 toggleEventTime();
                 toggleDeadlineTime();
             }
@@ -1831,6 +2281,7 @@
                 uploadGroup.classList.remove('hidden');
             } else {
                 uploadGroup.classList.add('hidden');
+                document.getElementById('coverPreview').classList.add('hidden');
             }
         }
 
@@ -1904,5 +2355,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974d6e82a4ac77dd',t:'MTc1NjE0OTQ2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974ddb9897a777e3',t:'MTc1NjE1MzkzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
