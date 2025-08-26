@@ -15,9 +15,14 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             min-height: 100vh;
             color: #333;
+        }
+
+        /* Admin and login pages keep gradient background */
+        body.admin-page {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .container {
@@ -178,17 +183,19 @@
         .event-cover img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            background: #f8f9fa;
         }
 
         .countdown {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
             padding: 25px;
             border-radius: 15px;
             text-align: center;
             margin: 20px 0;
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .countdown h3 {
@@ -205,7 +212,8 @@
         }
 
         .countdown-item {
-            background: rgba(255, 255, 255, 0.2);
+            background: white;
+            border: 1px solid #dee2e6;
             padding: 15px 10px;
             border-radius: 10px;
             text-align: center;
@@ -693,7 +701,8 @@
                     </div>
                     <div class="form-group">
                         <label>Limite de Confirmações</label>
-                        <input type="number" id="eventLimit" min="1" required>
+                        <input type="number" id="eventLimit" min="0" required>
+                        <small style="color: #666; display: block; margin-top: 5px;">Digite 0 para sem limite</small>
                     </div>
                     <div class="form-group">
                         <label>Máximo de Acompanhantes por Convidado</label>
@@ -811,7 +820,19 @@
             await checkSavedLogin();
             await loadEventFromUrl();
             setupEventListeners();
+            updateBodyClass();
         });
+
+        function updateBodyClass() {
+            const body = document.body;
+            const isGuestPage = !document.getElementById('guestView').classList.contains('hidden');
+            
+            if (isGuestPage && isEventPage) {
+                body.classList.remove('admin-page');
+            } else {
+                body.classList.add('admin-page');
+            }
+        }
 
         // Check Saved Login
         async function checkSavedLogin() {
@@ -854,14 +875,14 @@
                 // Update logo text
                 const logoElements = document.querySelectorAll('.logo h1');
                 logoElements.forEach(logo => {
-                    logo.innerHTML = '💐 InvitesAO - Noiva';
+                    logo.innerHTML = '🎉 InvitesAO';
                 });
             } else {
                 body.classList.add('version-noivos');
                 // Update logo text
                 const logoElements = document.querySelectorAll('.logo h1');
                 logoElements.forEach(logo => {
-                    logo.innerHTML = '🤵 InvitesAO - Noivos';
+                    logo.innerHTML = '🎉 InvitesAO';
                 });
             }
         }
@@ -988,6 +1009,7 @@
                 await loadGuestEvent(eventId);
             } else {
                 isEventPage = false;
+                // Block navigation without login - only allow guest view or login
                 if (currentUser) {
                     if (currentUser.isAdmin) {
                         showAdminDashboard();
@@ -998,6 +1020,7 @@
                         startApprovalCheck();
                     }
                 } else {
+                    // Force guest view - no access to other screens without login
                     showGuestView();
                 }
             }
@@ -1040,7 +1063,7 @@
                 document.getElementById('guestContent').innerHTML = `
                     <div style="text-align: center; padding: 40px;">
                         <h2>❌ Evento não encontrado</h2>
-                        <p style="color: #666;">O link do evento pode estar incorreto ou o evento foi removido.</p>
+                        <p style="color: #666; margin-bottom: 50px; line-height: 1.6;">O link do evento pode estar incorreto ou o evento foi removido.</p>
                         <button class="btn btn-primary" onclick="showLogin()">Fazer Login</button>
                         <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
                     </div>
@@ -1100,38 +1123,46 @@
             } else if (now <= deadline) {
                 responseSection = `
                     <div class="guest-form">
-                        <div class="form-group">
-                            <label>Seu nome completo</label>
-                            <input type="text" id="guestName" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Você é convidado de:</label>
-                            <select id="guestType" required>
-                                <option value="">Selecione...</option>
-                                <option value="noivo">🤵 Noivo</option>
-                                <option value="noiva">👰 Noiva</option>
-                            </select>
-                        </div>
                         <div class="response-section">
-                            <div class="response-question">Favor confirmar presença até</div>
-                            <div class="deadline-date">${formatEventDate(deadline, event.deadline_time_enabled)}</div>
-                            <div class="response-buttons" style="margin-top: 20px;">
-                                <button class="btn btn-danger" onclick="respondEvent(false)">
-                                    ⚫ Não
-                                </button>
-                                <button class="btn btn-success" onclick="respondEvent(true)">
-                                    ⚫ Sim
-                                </button>
+                            <div class="response-question">Confirma Presença?</div>
+                            <div class="deadline-text">Favor confirmar até ${formatEventDate(deadline, event.deadline_time_enabled)}</div>
+                            <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="attendance" value="true" onchange="handleAttendanceChange(true)">
+                                    <span>SIM</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="attendance" value="false" onchange="handleAttendanceChange(false)">
+                                    <span>NÃO</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="form-group companions-input hidden" id="companionsGroup">
-                            <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
-                                Este evento permite até ${event.max_companions || 5} acompanhante(s) por pessoa.
-                            </p>
-                        </div>
-                        <div id="responseButtons" class="hidden">
-                            <button class="btn btn-primary" onclick="submitResponse()">Confirmar</button>
-                            <button class="btn btn-secondary" onclick="cancelResponse()">Cancelar</button>
+                        <div id="guestDetailsForm" class="hidden">
+                            <div class="form-group">
+                                <label>Você é convidado(a) do(a):</label>
+                                <div style="display: flex; gap: 20px; justify-content: center; margin: 15px 0;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="radio" name="guestType" value="noivo">
+                                        <span>Noivo</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="radio" name="guestType" value="noiva">
+                                        <span>Noiva</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Seu nome completo</label>
+                                <input type="text" id="guestName" required>
+                            </div>
+                            <div id="companionsSection" class="hidden">
+                                <div class="form-group">
+                                    <label>Acompanhantes</label>
+                                    <div id="companionsList"></div>
+                                    <button type="button" class="btn btn-secondary btn-small" id="addCompanionBtn" onclick="addCompanion()" style="margin-top: 10px;">+ Incluir</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="submitResponse()">Enviar</button>
                         </div>
                     </div>
                 `;
@@ -1143,7 +1174,7 @@
                 ${coverHtml}
                 <h2 style="text-align: center; margin-bottom: 20px;">${event.name}</h2>
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <strong>📅 Data: ${eventDateFormatted}</strong>
+                    <strong>Data: ${eventDateFormatted}</strong>
                 </div>
                 ${event.description ? `<p style="margin-bottom: 20px; text-align: center; color: #666;">${event.description}</p>` : ''}
                 
@@ -1176,7 +1207,6 @@
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                 countdownElement.innerHTML = `
-                    <h3>⏰ Contagem Regressiva</h3>
                     <div class="countdown-grid">
                         <div class="countdown-item">
                             <span class="countdown-number">${days}</span>
@@ -1206,104 +1236,94 @@
             // Função removida - acompanhantes são definidos pelo organizador
         }
 
-        function respondEvent(attending) {
-            const guestName = document.getElementById('guestName').value;
-            if (!guestName.trim()) {
-                showNotification('Por favor, informe seu nome primeiro.', 'error');
-                return;
-            }
-
+        function handleAttendanceChange(attending) {
             currentAttending = attending;
+            const detailsForm = document.getElementById('guestDetailsForm');
+            const companionsSection = document.getElementById('companionsSection');
+            
+            detailsForm.classList.remove('hidden');
+            
             if (attending && currentEvent.max_companions > 0) {
-                document.getElementById('companionsGroup').classList.remove('hidden');
-                updateCompanionInputs();
+                companionsSection.classList.remove('hidden');
+                updateCompanionLimit();
             } else {
-                document.getElementById('companionsGroup').classList.add('hidden');
+                companionsSection.classList.add('hidden');
             }
-            document.getElementById('responseButtons').classList.remove('hidden');
         }
 
-        function updateCompanionInputs() {
-            const maxCompanions = currentEvent.max_companions || 0;
-            if (maxCompanions === 0) return;
-
-            const companionsGroup = document.getElementById('companionsGroup');
-            const existingInputs = companionsGroup.querySelector('.companions-names');
+        function updateCompanionLimit() {
+            const addBtn = document.getElementById('addCompanionBtn');
+            const companionsList = document.getElementById('companionsList');
+            const currentCompanions = companionsList.children.length;
             
-            if (existingInputs) {
-                existingInputs.remove();
+            if (currentCompanions >= currentEvent.max_companions) {
+                addBtn.style.display = 'none';
+            } else {
+                addBtn.style.display = 'inline-block';
             }
+        }
 
-            const companionsHtml = `
-                <div class="companions-names">
-                    <label>Quantos acompanhantes você trará? (máximo ${maxCompanions})</label>
-                    <select id="companionCount" onchange="updateCompanionNameInputs()" style="margin-bottom: 15px;">
-                        <option value="0">Nenhum acompanhante</option>
-                        ${Array.from({length: maxCompanions}, (_, i) => 
-                            `<option value="${i + 1}">${i + 1} acompanhante${i > 0 ? 's' : ''}</option>`
-                        ).join('')}
-                    </select>
-                    <div id="companionNameInputs"></div>
-                </div>
+        function addCompanion() {
+            const companionsList = document.getElementById('companionsList');
+            const currentCompanions = companionsList.children.length;
+            
+            if (currentCompanions >= currentEvent.max_companions) {
+                showNotification(`Máximo de ${currentEvent.max_companions} acompanhante(s) permitido.`, 'error');
+                return;
+            }
+            
+            const companionDiv = document.createElement('div');
+            companionDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+            companionDiv.innerHTML = `
+                <input type="text" placeholder="Nome do acompanhante" class="companion-input" style="flex: 1;">
+                <button type="button" class="btn btn-small btn-danger" onclick="removeCompanion(this)">Remover</button>
             `;
             
-            companionsGroup.insertAdjacentHTML('beforeend', companionsHtml);
+            companionsList.appendChild(companionDiv);
+            updateCompanionLimit();
         }
 
-        function updateCompanionNameInputs() {
-            const count = parseInt(document.getElementById('companionCount').value);
-            const container = document.getElementById('companionNameInputs');
-            
-            if (count === 0) {
-                container.innerHTML = '';
+        function removeCompanion(button) {
+            button.parentElement.remove();
+            updateCompanionLimit();
+        }
+
+
+
+        async function submitResponse() {
+            const guestNameInput = document.getElementById('guestName');
+            const guestTypeRadio = document.querySelector('input[name="guestType"]:checked');
+
+            if (!guestNameInput) {
+                showNotification('Erro: Campo de nome não encontrado.', 'error');
                 return;
             }
 
-            let html = '<div style="margin-top: 15px;"><label>Nome dos acompanhantes:</label>';
-            for (let i = 0; i < count; i++) {
-                html += `<input type="text" id="companion${i}" placeholder="Nome do ${i + 1}º acompanhante" style="margin-bottom: 10px;">`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
-
-        async function submitResponse() {
-            const guestName = document.getElementById('guestName').value.trim();
-            const guestType = document.getElementById('guestType').value;
+            const guestName = guestNameInput.value.trim();
 
             if (!guestName) {
                 showNotification('Por favor, informe seu nome.', 'error');
                 return;
             }
 
-            if (!guestType) {
+            if (!guestTypeRadio) {
                 showNotification('Por favor, selecione se você é convidado do noivo ou da noiva.', 'error');
                 return;
             }
 
+            const guestType = guestTypeRadio.value;
             let companions = 0;
             let companionNames = [];
 
+            // Collect companion names
             if (currentAttending && currentEvent.max_companions > 0) {
-                const companionCountElement = document.getElementById('companionCount');
-                if (companionCountElement) {
-                    companions = parseInt(companionCountElement.value) || 0;
-                    
-                    // Collect companion names
-                    for (let i = 0; i < companions; i++) {
-                        const nameInput = document.getElementById(`companion${i}`);
-                        if (nameInput && nameInput.value.trim()) {
-                            companionNames.push(nameInput.value.trim());
-                        }
+                const companionInputs = document.querySelectorAll('.companion-input');
+                companionInputs.forEach(input => {
+                    if (input.value && input.value.trim()) {
+                        companionNames.push(input.value.trim());
                     }
-
-                    // Validate that all companion names are provided
-                    if (companions > 0 && companionNames.length !== companions) {
-                        showNotification('Por favor, informe o nome de todos os acompanhantes.', 'error');
-                        return;
-                    }
-                }
+                });
+                companions = companionNames.length;
             }
 
             try {
@@ -1314,7 +1334,7 @@
                     attending: currentAttending,
                     companions: companions,
                     companion_names: companionNames,
-                    created_at: new Date().toISOString()
+                    created_at: editingResponse ? getGuestResponse(currentEvent.id).created_at : new Date().toISOString()
                 };
 
                 if (editingResponse) {
@@ -1342,12 +1362,8 @@
                 localStorage.setItem('eventResponses', JSON.stringify(responses));
 
                 let message = currentAttending 
-                    ? `🎉 Obrigado, ${guestName}! Sua presença foi confirmada.`
-                    : `😔 Obrigado por avisar, ${guestName}. Sentiremos sua falta!`;
-
-                if (currentAttending && companions > 0) {
-                    message += ` Você confirmou ${companions} acompanhante${companions > 1 ? 's' : ''}.`;
-                }
+                    ? 'Presença confirmada, grato!'
+                    : 'Resposta enviada, grato!';
 
                 showNotification(message, 'success');
                 setTimeout(() => {
@@ -1363,10 +1379,10 @@
         }
 
         function cancelResponse() {
-            document.getElementById('responseButtons').classList.add('hidden');
-            document.getElementById('companionsGroup').classList.add('hidden');
             currentAttending = null;
             editingResponse = false;
+            // Reload the event to show the original state
+            renderGuestEvent(currentEvent);
         }
 
         function getGuestResponse(eventId) {
@@ -1411,27 +1427,44 @@
                 const responseSection = `
                     <div class="guest-form">
                         <div class="form-group">
+                            <label>Você é convidado(a) do(a):</label>
+                            <div style="display: flex; gap: 20px; justify-content: center; margin: 15px 0;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="guestType" value="noivo" ${response.guest_type === 'noivo' ? 'checked' : ''}>
+                                    <span>Noivo</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="guestType" value="noiva" ${response.guest_type === 'noiva' ? 'checked' : ''}>
+                                    <span>Noiva</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label>Seu nome completo</label>
                             <input type="text" id="guestName" value="${response.guest_name}" required>
                         </div>
                         <div class="response-section">
-                            <div class="response-question">Favor confirmar presença até</div>
-                            <div class="deadline-date">${formatEventDate(new Date(currentEvent.deadline), currentEvent.deadline_time_enabled)}</div>
-                            <div class="response-buttons" style="margin-top: 20px;">
-                                <button class="btn btn-danger" onclick="respondEvent(false)">
-                                    ⚫ Não
-                                </button>
-                                <button class="btn btn-success" onclick="respondEvent(true)">
-                                    ⚫ Sim
-                                </button>
+                            <div class="response-question">Confirma Presença?</div>
+                            <div class="deadline-text">Favor confirmar até ${formatEventDate(new Date(currentEvent.deadline), currentEvent.deadline_time_enabled)}</div>
+                            <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="attendance" value="true" ${response.attending ? 'checked' : ''} onchange="handleAttendanceChange(true)">
+                                    <span>SIM</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="attendance" value="false" ${!response.attending ? 'checked' : ''} onchange="handleAttendanceChange(false)">
+                                    <span>NÃO</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="form-group companions-input hidden" id="companionsGroup">
-                            <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
-                                Este evento permite até ${currentEvent.max_companions || 5} acompanhante(s) por pessoa.
-                            </p>
-                        </div>
-                        <div id="responseButtons" class="hidden">
+                        <div id="guestDetailsForm">
+                            <div id="companionsSection" class="${response.attending && currentEvent.max_companions > 0 ? '' : 'hidden'}">
+                                <div class="form-group">
+                                    <label>Acompanhantes</label>
+                                    <div id="companionsList"></div>
+                                    <button type="button" class="btn btn-secondary btn-small" id="addCompanionBtn" onclick="addCompanion()" style="margin-top: 10px;">+ Incluir</button>
+                                </div>
+                            </div>
                             <button class="btn btn-primary" onclick="submitResponse()">Confirmar Alteração</button>
                             <button class="btn btn-secondary" onclick="cancelResponse()">Cancelar</button>
                         </div>
@@ -1444,31 +1477,30 @@
                     responseStatusDiv.outerHTML = responseSection;
                 }
                 
-                // Pre-select the current response
+                // Pre-select the current response and restore companions
                 setTimeout(() => {
-                    respondEvent(response.attending);
+                    currentAttending = response.attending;
                     
                     // If there were companions, restore them
-                    if (response.attending && response.companions > 0) {
-                        setTimeout(() => {
-                            const companionCountSelect = document.getElementById('companionCount');
-                            if (companionCountSelect) {
-                                companionCountSelect.value = response.companions;
-                                updateCompanionNameInputs();
-                                
-                                // Fill in companion names
-                                setTimeout(() => {
-                                    if (response.companion_names && response.companion_names.length > 0) {
-                                        response.companion_names.forEach((name, index) => {
-                                            const input = document.getElementById(`companion${index}`);
-                                            if (input) {
-                                                input.value = name;
-                                            }
-                                        });
-                                    }
-                                }, 100);
-                            }
-                        }, 100);
+                    if (response.attending && response.companions > 0 && response.companion_names) {
+                        const companionsList = document.getElementById('companionsList');
+                        if (companionsList) {
+                            // Clear existing companions
+                            companionsList.innerHTML = '';
+                            
+                            // Add each companion
+                            response.companion_names.forEach(name => {
+                                const companionDiv = document.createElement('div');
+                                companionDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+                                companionDiv.innerHTML = `
+                                    <input type="text" placeholder="Nome do acompanhante" class="companion-input" style="flex: 1;" value="${name}">
+                                    <button type="button" class="btn btn-small btn-danger" onclick="removeCompanion(this)">Remover</button>
+                                `;
+                                companionsList.appendChild(companionDiv);
+                            });
+                            
+                            updateCompanionLimit();
+                        }
                     }
                 }, 100);
             }
@@ -1634,8 +1666,7 @@
                 const eventsHtml = events.map(event => {
                     const responseCount = event.responses?.length || 0;
                     const confirmedCount = event.responses?.filter(r => r.attending).length || 0;
-                    const versionParam = event.site_version ? `&version=${event.site_version}` : '';
-                    const eventUrl = `${window.location.origin}${window.location.pathname}?event=${event.id}${versionParam}`;
+                    const eventUrl = `${window.location.origin}${window.location.pathname}?event=${event.id}`;
                     const eventDate = event.event_date ? new Date(event.event_date) : null;
                     const statusText = event.active !== false ? 'Ativo' : 'Inativo';
                     const statusClass = event.active !== false ? 'success' : 'danger';
@@ -1646,12 +1677,11 @@
                             <h3>${event.name} <span class="btn btn-small btn-${statusClass}" style="font-size: 10px; padding: 2px 8px;">${statusText}</span></h3>
                             <p><strong>Data:</strong> ${event.event_date ? formatEventDate(new Date(event.event_date), event.time_enabled) : 'Data não definida'}</p>
                             <p><strong>Versão:</strong> ${versionText}</p>
-                            <p><strong>Confirmações:</strong> ${confirmedCount}/${event.event_limit}</p>
+                            <p><strong>Confirmações:</strong> ${confirmedCount}/${event.event_limit === 0 ? '∞' : event.event_limit}</p>
                             <p><strong>Total de respostas:</strong> ${responseCount}</p>
                             <div style="margin: 10px 0;">
-                                <p><strong>Links dos Convidados:</strong></p>
-                                <small><strong>🤵 Noivos:</strong> <a href="${eventUrl}&version=noivos" target="_blank" style="word-break: break-all; font-size: 11px;">${eventUrl}&version=noivos</a></small><br>
-                                <small><strong>👰 Noiva:</strong> <a href="${eventUrl}&version=noiva" target="_blank" style="word-break: break-all; font-size: 11px;">${eventUrl}&version=noiva</a></small>
+                                <p><strong>Link dos Convidados:</strong></p>
+                                <small><a href="${eventUrl}" target="_blank" style="word-break: break-all; font-size: 11px;">${eventUrl}</a></small>
                             </div>
                             <div style="margin-top: 15px;">
                                 <button class="btn btn-small btn-secondary" onclick="editEvent('${event.id}')">Editar</button>
@@ -1689,8 +1719,9 @@
                 return;
             }
 
-            const eventDateTime = eventTime ? `${eventDate}T${eventTime}` : `${eventDate}T23:59`;
-            const deadlineDateTime = deadlineTime ? `${deadlineDate}T${deadlineTime}` : `${deadlineDate}T23:59`;
+            // Fix timezone issue by creating dates in local timezone
+            const eventDateTime = eventTime ? `${eventDate}T${eventTime}:00` : `${eventDate}T23:59:00`;
+            const deadlineDateTime = deadlineTime ? `${deadlineDate}T${deadlineTime}:00` : `${deadlineDate}T23:59:00`;
 
             const eventData = {
                 name: document.getElementById('eventName').value,
@@ -1757,15 +1788,11 @@
                     
                     if (newEvent) {
                         const baseUrl = `${window.location.origin}${window.location.pathname}`;
-                        const linkNoivos = `${baseUrl}?event=${newEvent.id}&version=noivos`;
-                        const linkNoiva = `${baseUrl}?event=${newEvent.id}&version=noiva`;
+                        const eventLink = `${baseUrl}?event=${newEvent.id}`;
                         
                         showNotification(`Evento criado com sucesso!<br><br>
-                            <strong>Links gerados:</strong><br>
-                            <small><strong>Convidados do Noivo:</strong><br>
-                            <a href="${linkNoivos}" target="_blank" style="word-break: break-all;">${linkNoivos}</a></small><br><br>
-                            <small><strong>Convidados da Noiva:</strong><br>
-                            <a href="${linkNoiva}" target="_blank" style="word-break: break-all;">${linkNoiva}</a></small>`, 'success', 'eventNotification');
+                            <strong>Link gerado:</strong><br>
+                            <small><a href="${eventLink}" target="_blank" style="word-break: break-all;">${eventLink}</a></small>`, 'success', 'eventNotification');
                     } else {
                         showNotification('Evento criado com sucesso!', 'success', 'eventNotification');
                     }
@@ -1968,7 +1995,7 @@
                         <p><strong>Confirmados:</strong> ${attending.length} pessoas + ${totalCompanions} acompanhantes = ${attending.length + totalCompanions} total</p>
                         <p><strong>Não comparecerão:</strong> ${notAttending.length}</p>
                         <p><strong>Total de respostas:</strong> ${responses.length}</p>
-                        <p><strong>Limite do evento:</strong> ${event.event_limit}</p>
+                        <p><strong>Limite do evento:</strong> ${event.event_limit === 0 ? 'Sem limite' : event.event_limit}</p>
                         
                         <h4 style="margin-top: 20px; color: #667eea;">🤵 Convidados do Noivo (${attendingNoivo.length} + ${companionsNoivo} acompanhantes)</h4>
                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
@@ -2560,6 +2587,7 @@
         function showGuestView() {
             hideAllViews();
             document.getElementById('guestView').classList.remove('hidden');
+            updateBodyClass();
         }
 
         function showLogin() {
@@ -2674,5 +2702,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974e2bd360ad77d7',t:'MTc1NjE1NzIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975550a836d677da',t:'MTc1NjIzMjEzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
