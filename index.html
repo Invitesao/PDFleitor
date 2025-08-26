@@ -589,6 +589,10 @@
                             <button type="button" onclick="togglePasswordVisibility('loginPassword')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
                         </div>
                     </div>
+                    <div class="checkbox-group" style="margin-bottom: 20px;">
+                        <input type="checkbox" id="rememberLogin">
+                        <label for="rememberLogin">Lembrar dados de acesso</label>
+                    </div>
                     <button type="submit" class="btn btn-primary">Entrar</button>
                 </form>
                 <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
@@ -798,6 +802,16 @@
                 <div id="userManagement"></div>
             </div>
 
+            <div class="card" style="margin-bottom: 25px;" id="adminOnlySection">
+                <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.4em;">🔧 Funções Administrativas</h3>
+                <p style="color: #666; margin-bottom: 15px;">Estas funções estão disponíveis apenas para administradores principais.</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="exportAllData()">📊 Exportar Dados</button>
+                    <button class="btn btn-secondary" onclick="systemSettings()">⚙️ Configurações</button>
+                    <button class="btn btn-danger" onclick="systemMaintenance()">🔧 Manutenção</button>
+                </div>
+            </div>
+
             <div class="card" style="margin-bottom: 25px;">
                 <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.4em;">🎉 Todos os Eventos</h3>
                 <div id="allEvents"></div>
@@ -823,6 +837,7 @@
         let currentAttending = null;
         let editingResponse = false;
         let currentSiteVersion = 'noivos'; // 'noivos' or 'noiva'
+        let rememberCredentials = false;
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', async () => {
@@ -846,6 +861,20 @@
         // Check Saved Login
         async function checkSavedLogin() {
             const savedUser = localStorage.getItem('currentUser');
+            const savedCredentials = localStorage.getItem('savedCredentials');
+            
+            // Load saved credentials if available
+            if (savedCredentials) {
+                try {
+                    const credentials = JSON.parse(savedCredentials);
+                    document.getElementById('loginUsername').value = credentials.username || '';
+                    document.getElementById('loginPassword').value = credentials.password || '';
+                    document.getElementById('rememberLogin').checked = true;
+                } catch (error) {
+                    localStorage.removeItem('savedCredentials');
+                }
+            }
+            
             if (savedUser) {
                 try {
                     const user = JSON.parse(savedUser);
@@ -1594,6 +1623,17 @@
             e.preventDefault();
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
+            const rememberLogin = document.getElementById('rememberLogin').checked;
+
+            // Save credentials if requested
+            if (rememberLogin) {
+                localStorage.setItem('savedCredentials', JSON.stringify({
+                    username: username,
+                    password: password
+                }));
+            } else {
+                localStorage.removeItem('savedCredentials');
+            }
 
             // Check admin credentials
             if (username === 'Invites' && password === '#Invites2025@!!1995') {
@@ -1630,7 +1670,13 @@
 
                 currentUser = user;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                showUserDashboard();
+                
+                // Check if user is moderator
+                if (user.is_moderator) {
+                    showAdminDashboard();
+                } else {
+                    showUserDashboard();
+                }
             } catch (error) {
                 showNotification('Erro ao fazer login: ' + error.message, 'error', 'loginNotification');
             }
@@ -1710,6 +1756,7 @@
             if (approvalCheckInterval) clearInterval(approvalCheckInterval);
             currentUser = null;
             localStorage.removeItem('currentUser');
+            // Don't remove saved credentials on logout
             if (isEventPage) {
                 location.reload();
             } else {
@@ -1724,6 +1771,28 @@
             } else {
                 showGuestView();
             }
+        }
+
+        // Permission Functions
+        function hasPermission(permission) {
+            if (!currentUser) return false;
+            if (currentUser.isAdmin) return true;
+            
+            // Default permissions for regular users
+            const defaultPermissions = {
+                can_delete_events: true,
+                can_delete_account: false,
+                can_deactivate_account: false,
+                is_moderator: false
+            };
+            
+            // Use user permissions or default
+            const userPermissions = currentUser.permissions || defaultPermissions;
+            return userPermissions[permission] === true;
+        }
+
+        function canModerate() {
+            return currentUser && (currentUser.isAdmin || currentUser.is_moderator);
         }
 
         // User Dashboard Functions
@@ -1755,6 +1824,11 @@
                     const statusClass = event.active !== false ? 'success' : 'danger';
                     const versionText = event.site_version === 'noiva' ? '💐 Noiva' : '🤵 Noivos';
                     
+                    // Check permissions for delete button
+                    const deleteButton = hasPermission('can_delete_events') 
+                        ? `<button class="btn btn-small btn-danger" onclick="deleteEvent('${event.id}')">Excluir</button>`
+                        : '';
+                    
                     return `
                         <div class="event-card">
                             <h3>${event.name} <span class="btn btn-small btn-${statusClass}" style="font-size: 10px; padding: 2px 8px;">${statusText}</span></h3>
@@ -1772,7 +1846,7 @@
                                 <button class="btn btn-small btn-success" onclick="downloadReport('${event.id}')">Baixar PDF</button>
                                 <button class="btn btn-small btn-secondary" onclick="manageGuests('${event.id}')">Gerenciar Convidados</button>
                                 <button class="btn btn-small ${event.active !== false ? 'btn-danger' : 'btn-success'}" onclick="toggleEventStatus('${event.id}', ${event.active === false})">${event.active !== false ? 'Desativar' : 'Ativar'}</button>
-                                <button class="btn btn-small btn-danger" onclick="deleteEvent('${event.id}')">Excluir</button>
+                                ${deleteButton}
                             </div>
                         </div>
                     `;
@@ -1956,6 +2030,11 @@
         }
 
         async function deleteEvent(eventId) {
+            if (!hasPermission('can_delete_events')) {
+                showNotification('Você não tem permissão para excluir eventos.', 'error', 'userNotification');
+                return;
+            }
+
             if (!confirm('Tem certeza que deseja excluir este evento?')) return;
 
             try {
@@ -2010,7 +2089,7 @@
                                         ${r.companions > 0 ? `<br><small style="color: #666;">+ ${r.companions} acompanhante(s)</small>` : ''}
                                         <br><small style="color: #666;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
                                     </div>
-                                    <button class="btn btn-small btn-danger" onclick="removeGuest('${eventId}', '${r.guest_name}')">🗑️ Remover</button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'manageGuests')" title="Eliminar resposta">🗑️ Eliminar</button>
                                 </div>
                             `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma confirmação ainda.</p>'}
                         </div>
@@ -2026,7 +2105,7 @@
                                         </span>
                                         <br><small style="color: #666;">Respondido em: ${formatDate(new Date(r.created_at))}</small>
                                     </div>
-                                    <button class="btn btn-small btn-danger" onclick="removeGuest('${eventId}', '${r.guest_name}')">🗑️ Remover</button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'manageGuests')" title="Eliminar resposta">🗑️ Eliminar</button>
                                 </div>
                             `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma resposta negativa ainda.</p>'}
                         </div>
@@ -2069,6 +2148,38 @@
             }
         }
 
+        async function deleteResponse(eventId, guestName, returnView = 'viewResponses') {
+            if (!confirm(`Tem certeza que deseja eliminar a resposta de ${guestName}?\n\nEsta ação não pode ser desfeita e a resposta será removida permanentemente do sistema.`)) return;
+
+            try {
+                const { error } = await supabase
+                    .from('responses')
+                    .delete()
+                    .eq('event_id', eventId)
+                    .eq('guest_name', guestName);
+
+                if (error) throw error;
+
+                // Remove from localStorage as well
+                const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
+                if (responses[eventId] && responses[eventId].guest_name === guestName) {
+                    delete responses[eventId];
+                    localStorage.setItem('eventResponses', JSON.stringify(responses));
+                }
+
+                showNotification(`Resposta de ${guestName} eliminada com sucesso!`, 'success', 'userNotification');
+                
+                // Return to the appropriate view
+                if (returnView === 'viewResponses') {
+                    await viewResponses(eventId);
+                } else if (returnView === 'manageGuests') {
+                    await manageGuests(eventId);
+                }
+            } catch (error) {
+                showNotification('Erro ao eliminar resposta: ' + error.message, 'error', 'userNotification');
+            }
+        }
+
         async function viewResponses(eventId) {
             try {
                 const { data: event, error: eventError } = await supabase
@@ -2106,10 +2217,14 @@
                         <h4 style="margin-top: 20px; color: #667eea;">🤵 Convidados do Noivo (${attendingNoivo.length} + ${companionsNoivo} acompanhantes)</h4>
                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
                             ${attendingNoivo.map(r => `
-                                <div style="padding: 10px; border-bottom: 1px solid #eee;">
-                                    <strong>${r.guest_name}</strong>
-                                    ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
-                                    <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
+                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${r.guest_name}</strong>
+                                        ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
+                                        ${r.companion_names && r.companion_names.length > 0 ? `<br><small style="color: #666;">Acompanhantes: ${r.companion_names.join(', ')}</small>` : ''}
+                                        <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
+                                    </div>
+                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'viewResponses')" title="Eliminar resposta">🗑️</button>
                                 </div>
                             `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhum convidado do noivo confirmado.</p>'}
                         </div>
@@ -2117,10 +2232,14 @@
                         <h4 style="margin-top: 20px; color: #ff9a9e;">👰 Convidados da Noiva (${attendingNoiva.length} + ${companionsNoiva} acompanhantes)</h4>
                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
                             ${attendingNoiva.map(r => `
-                                <div style="padding: 10px; border-bottom: 1px solid #eee;">
-                                    <strong>${r.guest_name}</strong>
-                                    ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
-                                    <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
+                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${r.guest_name}</strong>
+                                        ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
+                                        ${r.companion_names && r.companion_names.length > 0 ? `<br><small style="color: #666;">Acompanhantes: ${r.companion_names.join(', ')}</small>` : ''}
+                                        <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
+                                    </div>
+                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'viewResponses')" title="Eliminar resposta">🗑️</button>
                                 </div>
                             `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhum convidado da noiva confirmado.</p>'}
                         </div>
@@ -2128,9 +2247,12 @@
                         <h4 style="margin-top: 20px; color: #dc3545;">❌ Não comparecerão (${notAttending.length})</h4>
                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
                             ${notAttending.map(r => `
-                                <div style="padding: 10px; border-bottom: 1px solid #eee;">
-                                    <strong>${r.guest_name}</strong>
-                                    <small style="color: #666; display: block;">Respondido em: ${formatDate(new Date(r.created_at))}</small>
+                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${r.guest_name}</strong>
+                                        <small style="color: #666; display: block;">Respondido em: ${formatDate(new Date(r.created_at))}</small>
+                                    </div>
+                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'viewResponses')" title="Eliminar resposta">🗑️</button>
                                 </div>
                             `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma resposta negativa.</p>'}
                         </div>
@@ -2439,6 +2561,15 @@
         async function showAdminDashboard() {
             hideAllViews();
             document.getElementById('adminDashboard').classList.remove('hidden');
+            
+            // Hide admin-only section for moderators
+            const adminOnlySection = document.getElementById('adminOnlySection');
+            if (currentUser && !currentUser.isAdmin && currentUser.is_moderator) {
+                adminOnlySection.style.display = 'none';
+            } else {
+                adminOnlySection.style.display = 'block';
+            }
+            
             await loadAdminData();
         }
 
@@ -2475,27 +2606,36 @@
 
                 // Load user management
                 const approvedUsers = users?.filter(u => u.approved) || [];
-                const usersHtml = approvedUsers.map(user => `
-                    <div style="padding: 20px; border: 2px solid ${user.active ? '#28a745' : '#dc3545'}; border-radius: 12px; margin-bottom: 15px; background: ${user.active ? '#f8fff8' : '#fff5f5'};">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
-                            <div>
-                                <strong style="font-size: 1.1em; color: #333;">${user.name}</strong>
-                                <span style="margin-left: 10px; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: ${user.active ? '#28a745' : '#dc3545'}; color: white;">${user.active ? '🟢 ATIVO' : '🔴 INATIVO'}</span><br>
-                                <small style="color: #666;">👤 @${user.username}</small><br>
-                                <small style="color: #666;">📱 ${user.phone}</small>
-                            </div>
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                <button class="btn btn-small btn-secondary" onclick="loginAsUser('${user.id}')">🔑 Entrar como usuário</button>
-                                <button class="btn btn-small ${user.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserStatus('${user.id}', ${!user.active})">
-                                    ${user.active ? '🚫 Desativar' : '✅ Ativar'}
-                                </button>
-                                <button class="btn btn-small btn-secondary" onclick="viewUserPassword('${user.id}')">👁️ Ver Senha</button>
-                                <button class="btn btn-small btn-secondary" onclick="changeUserPassword('${user.id}')">🔐 Alterar Senha</button>
-                                <button class="btn btn-small btn-danger" onclick="deleteUser('${user.id}')">🗑️ Eliminar</button>
+                const usersHtml = approvedUsers.map(user => {
+                    const isModerator = user.is_moderator;
+                    const canDeleteEvents = user.can_delete_events !== false;
+                    
+                    return `
+                        <div style="padding: 20px; border: 2px solid ${user.active ? '#28a745' : '#dc3545'}; border-radius: 12px; margin-bottom: 15px; background: ${user.active ? '#f8fff8' : '#fff5f5'};">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                                <div>
+                                    <strong style="font-size: 1.1em; color: #333;">${user.name}</strong>
+                                    <span style="margin-left: 10px; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: ${user.active ? '#28a745' : '#dc3545'}; color: white;">${user.active ? '🟢 ATIVO' : '🔴 INATIVO'}</span>
+                                    ${isModerator ? '<span style="margin-left: 5px; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #667eea; color: white;">👑 MODERADOR</span>' : ''}
+                                    <br>
+                                    <small style="color: #666;">👤 @${user.username}</small><br>
+                                    <small style="color: #666;">📱 ${user.phone}</small><br>
+                                    <small style="color: #666;">🗑️ Pode excluir eventos: ${canDeleteEvents ? 'Sim' : 'Não'}</small>
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <button class="btn btn-small btn-secondary" onclick="loginAsUser('${user.id}')">🔑 Entrar como usuário</button>
+                                    <button class="btn btn-small ${user.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserStatus('${user.id}', ${!user.active})">
+                                        ${user.active ? '🚫 Desativar' : '✅ Ativar'}
+                                    </button>
+                                    <button class="btn btn-small btn-secondary" onclick="manageUserPermissions('${user.id}')">⚙️ Permissões</button>
+                                    <button class="btn btn-small btn-secondary" onclick="viewUserPassword('${user.id}')">👁️ Ver Senha</button>
+                                    <button class="btn btn-small btn-secondary" onclick="changeUserPassword('${user.id}')">🔐 Alterar Senha</button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteUser('${user.id}')">🗑️ Eliminar</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
                 document.getElementById('userManagement').innerHTML = usersHtml || '<p>Nenhum usuário aprovado.</p>';
 
                 // Load all events
@@ -2522,6 +2662,11 @@
         }
 
         async function approveUser(userId) {
+            if (!canModerate()) {
+                showNotification('Você não tem permissão para aprovar usuários.', 'error', 'adminNotification');
+                return;
+            }
+
             try {
                 const { error } = await supabase
                     .from('users')
@@ -2538,6 +2683,11 @@
         }
 
         async function rejectUser(userId) {
+            if (!canModerate()) {
+                showNotification('Você não tem permissão para rejeitar usuários.', 'error', 'adminNotification');
+                return;
+            }
+
             if (!confirm('Tem certeza que deseja rejeitar este usuário?')) return;
 
             try {
@@ -2619,6 +2769,78 @@
                 showNotification('Senha alterada com sucesso!', 'success', 'adminNotification');
             } catch (error) {
                 showNotification('Erro ao alterar senha: ' + error.message, 'error', 'adminNotification');
+            }
+        }
+
+        async function manageUserPermissions(userId) {
+            try {
+                const { data: user, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) throw error;
+
+                const isModerator = user.is_moderator || false;
+                const canDeleteEvents = user.can_delete_events !== false;
+
+                const permissionsHtml = `
+                    <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; margin: 20px auto;">
+                        <h3 style="margin-bottom: 20px; color: #667eea;">⚙️ Gerenciar Permissões - ${user.name}</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                                <input type="checkbox" id="isModerator" ${isModerator ? 'checked' : ''}>
+                                <div>
+                                    <strong>👑 Moderador</strong>
+                                    <br><small style="color: #666;">Pode aprovar novos usuários e acessar painel administrativo</small>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                                <input type="checkbox" id="canDeleteEvents" ${canDeleteEvents ? 'checked' : ''}>
+                                <div>
+                                    <strong>🗑️ Excluir Eventos</strong>
+                                    <br><small style="color: #666;">Pode excluir seus próprios eventos</small>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 25px;">
+                            <button class="btn btn-primary" onclick="saveUserPermissions('${userId}')">💾 Salvar</button>
+                            <button class="btn btn-secondary" onclick="loadAdminData()">❌ Cancelar</button>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('userManagement').innerHTML = permissionsHtml;
+            } catch (error) {
+                showNotification('Erro ao carregar permissões: ' + error.message, 'error', 'adminNotification');
+            }
+        }
+
+        async function saveUserPermissions(userId) {
+            try {
+                const isModerator = document.getElementById('isModerator').checked;
+                const canDeleteEvents = document.getElementById('canDeleteEvents').checked;
+
+                const { error } = await supabase
+                    .from('users')
+                    .update({
+                        is_moderator: isModerator,
+                        can_delete_events: canDeleteEvents
+                    })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                showNotification('Permissões atualizadas com sucesso!', 'success', 'adminNotification');
+                await loadAdminData();
+            } catch (error) {
+                showNotification('Erro ao salvar permissões: ' + error.message, 'error', 'adminNotification');
             }
         }
 
@@ -2850,6 +3072,31 @@
                 button.title = 'Mostrar senha';
             }
         }
+
+        // Admin-only functions (placeholder)
+        function exportAllData() {
+            if (!currentUser || !currentUser.isAdmin) {
+                showNotification('Acesso negado. Apenas administradores principais.', 'error', 'adminNotification');
+                return;
+            }
+            showNotification('Função de exportação em desenvolvimento.', 'info', 'adminNotification');
+        }
+
+        function systemSettings() {
+            if (!currentUser || !currentUser.isAdmin) {
+                showNotification('Acesso negado. Apenas administradores principais.', 'error', 'adminNotification');
+                return;
+            }
+            showNotification('Configurações do sistema em desenvolvimento.', 'info', 'adminNotification');
+        }
+
+        function systemMaintenance() {
+            if (!currentUser || !currentUser.isAdmin) {
+                showNotification('Acesso negado. Apenas administradores principais.', 'error', 'adminNotification');
+                return;
+            }
+            showNotification('Ferramentas de manutenção em desenvolvimento.', 'info', 'adminNotification');
+        }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97561d1c026077e3',t:'MTc1NjI0MDUwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97562b86840b77e3',t:'MTc1NjI0MTA5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
