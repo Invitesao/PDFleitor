@@ -552,10 +552,9 @@
                 </div>
                 <div id="guestContent">
                     <div style="text-align: center; padding: 40px;">
-                        <h2>🎉 Bem-vindo ao InvitesAO</h2>
-                        <p style="margin: 20px 0; color: #666;">Sistema de confirmação de presença para seus eventos especiais.</p>
-                        <button class="btn btn-primary" onclick="showLogin()">Fazer Login</button>
-                        <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
+                        <div class="spinner"></div>
+                        <h3>Carregando evento...</h3>
+                        <p style="color: #666;">Por favor, aguarde.</p>
                     </div>
                 </div>
             </div>
@@ -1009,7 +1008,10 @@
                 await loadGuestEvent(eventId);
             } else {
                 isEventPage = false;
-                // Block navigation without login - only allow guest view or login
+                // Show welcome screen for non-event pages
+                showWelcomeScreen();
+                
+                // Check if user is logged in and redirect accordingly
                 if (currentUser) {
                     if (currentUser.isAdmin) {
                         showAdminDashboard();
@@ -1019,9 +1021,6 @@
                         showPendingView();
                         startApprovalCheck();
                     }
-                } else {
-                    // Force guest view - no access to other screens without login
-                    showGuestView();
                 }
             }
         }
@@ -1069,6 +1068,17 @@
                     </div>
                 `;
             }
+        }
+
+        function showWelcomeScreen() {
+            document.getElementById('guestContent').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h2>🎉 Bem-vindo ao InvitesAO</h2>
+                    <p style="margin: 20px 0; color: #666;">Sistema de confirmação de presença para seus eventos especiais.</p>
+                    <button class="btn btn-primary" onclick="showLogin()">Fazer Login</button>
+                    <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
+                </div>
+            `;
         }
 
         function renderGuestEvent(event) {
@@ -2723,5 +2733,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9755599ef1bb77da',t:'MTc1NjIzMjQ5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975568b943d477da',t:'MTc1NjIzMzExNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
