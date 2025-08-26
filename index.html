@@ -480,6 +480,46 @@
             margin-bottom: 20px;
         }
 
+        /* Version-specific styles */
+        .version-noivos {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .version-noiva {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+        }
+
+        .version-noiva .btn-primary {
+            background: linear-gradient(135deg, #ff9a9e 0%, #f093fb 100%);
+        }
+
+        .version-noiva .btn-primary:hover {
+            box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
+        }
+
+        .version-noiva .stats-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #f093fb 100%);
+        }
+
+        .version-noiva .countdown {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+        }
+
+        .version-noiva input:focus, 
+        .version-noiva textarea:focus, 
+        .version-noiva select:focus {
+            border-color: #ff9a9e;
+            box-shadow: 0 0 0 3px rgba(255, 154, 158, 0.1);
+        }
+
+        .version-noiva .logo h1 {
+            color: #ff6b9d;
+        }
+
+        .version-noivos .logo h1 {
+            color: #667eea;
+        }
+
         @media (min-width: 768px) {
             .admin-container {
                 padding: 40px;
@@ -664,6 +704,13 @@
                         <textarea id="eventDescription" rows="3"></textarea>
                     </div>
                     <div class="form-group">
+                        <label>Versão do Site</label>
+                        <select id="siteVersion">
+                            <option value="noivos">🤵 Versão dos Noivos (Azul/Roxo)</option>
+                            <option value="noiva">💐 Versão da Noiva (Rosa)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <div class="checkbox-group">
                             <input type="checkbox" id="eventCoverEnabled">
                             <label for="eventCoverEnabled">Permitir foto de capa</label>
@@ -757,6 +804,7 @@
         let dragStart = { x: 0, y: 0 };
         let currentAttending = null;
         let editingResponse = false;
+        let currentSiteVersion = 'noivos'; // 'noivos' or 'noiva'
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', async () => {
@@ -791,6 +839,30 @@
                 } catch (error) {
                     localStorage.removeItem('currentUser');
                 }
+            }
+        }
+
+        // Apply Site Version Styling
+        function applySiteVersionStyling() {
+            const body = document.body;
+            
+            // Remove existing version classes
+            body.classList.remove('version-noivos', 'version-noiva');
+            
+            if (currentSiteVersion === 'noiva') {
+                body.classList.add('version-noiva');
+                // Update logo text
+                const logoElements = document.querySelectorAll('.logo h1');
+                logoElements.forEach(logo => {
+                    logo.innerHTML = '💐 InvitesAO - Noiva';
+                });
+            } else {
+                body.classList.add('version-noivos');
+                // Update logo text
+                const logoElements = document.querySelectorAll('.logo h1');
+                logoElements.forEach(logo => {
+                    logo.innerHTML = '🤵 InvitesAO - Noivos';
+                });
             }
         }
 
@@ -899,6 +971,17 @@
         async function loadEventFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const eventId = urlParams.get('event');
+            const version = urlParams.get('version');
+            
+            // Set site version based on URL parameter
+            if (version === 'noiva') {
+                currentSiteVersion = 'noiva';
+            } else {
+                currentSiteVersion = 'noivos';
+            }
+            
+            // Apply version-specific styling
+            applySiteVersionStyling();
             
             if (eventId) {
                 isEventPage = true;
@@ -943,6 +1026,14 @@
                 }
 
                 currentEvent = event;
+                
+                // Apply event's site version if not specified in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                if (!urlParams.get('version') && event.site_version) {
+                    currentSiteVersion = event.site_version;
+                    applySiteVersionStyling();
+                }
+                
                 renderGuestEvent(event);
                 showGuestView();
             } catch (error) {
@@ -1012,6 +1103,14 @@
                         <div class="form-group">
                             <label>Seu nome completo</label>
                             <input type="text" id="guestName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Você é convidado de:</label>
+                            <select id="guestType" required>
+                                <option value="">Selecione...</option>
+                                <option value="noivo">🤵 Noivo</option>
+                                <option value="noiva">👰 Noiva</option>
+                            </select>
                         </div>
                         <div class="response-section">
                             <div class="response-question">Favor confirmar presença até</div>
@@ -1171,9 +1270,15 @@
 
         async function submitResponse() {
             const guestName = document.getElementById('guestName').value.trim();
+            const guestType = document.getElementById('guestType').value;
 
             if (!guestName) {
                 showNotification('Por favor, informe seu nome.', 'error');
+                return;
+            }
+
+            if (!guestType) {
+                showNotification('Por favor, selecione se você é convidado do noivo ou da noiva.', 'error');
                 return;
             }
 
@@ -1205,6 +1310,7 @@
                 const responseData = {
                     event_id: currentEvent.id,
                     guest_name: guestName,
+                    guest_type: guestType,
                     attending: currentAttending,
                     companions: companions,
                     companion_names: companionNames,
@@ -1528,22 +1634,30 @@
                 const eventsHtml = events.map(event => {
                     const responseCount = event.responses?.length || 0;
                     const confirmedCount = event.responses?.filter(r => r.attending).length || 0;
-                    const eventUrl = `${window.location.origin}${window.location.pathname}?event=${event.id}`;
+                    const versionParam = event.site_version ? `&version=${event.site_version}` : '';
+                    const eventUrl = `${window.location.origin}${window.location.pathname}?event=${event.id}${versionParam}`;
                     const eventDate = event.event_date ? new Date(event.event_date) : null;
                     const statusText = event.active !== false ? 'Ativo' : 'Inativo';
                     const statusClass = event.active !== false ? 'success' : 'danger';
+                    const versionText = event.site_version === 'noiva' ? '💐 Noiva' : '🤵 Noivos';
                     
                     return `
                         <div class="event-card">
                             <h3>${event.name} <span class="btn btn-small btn-${statusClass}" style="font-size: 10px; padding: 2px 8px;">${statusText}</span></h3>
                             <p><strong>Data:</strong> ${event.event_date ? formatEventDate(new Date(event.event_date), event.time_enabled) : 'Data não definida'}</p>
+                            <p><strong>Versão:</strong> ${versionText}</p>
                             <p><strong>Confirmações:</strong> ${confirmedCount}/${event.event_limit}</p>
                             <p><strong>Total de respostas:</strong> ${responseCount}</p>
-                            <p><strong>Link:</strong> <a href="${eventUrl}" target="_blank" style="word-break: break-all; font-size: 12px;">${eventUrl}</a></p>
+                            <div style="margin: 10px 0;">
+                                <p><strong>Links dos Convidados:</strong></p>
+                                <small><strong>🤵 Noivos:</strong> <a href="${eventUrl}&version=noivos" target="_blank" style="word-break: break-all; font-size: 11px;">${eventUrl}&version=noivos</a></small><br>
+                                <small><strong>👰 Noiva:</strong> <a href="${eventUrl}&version=noiva" target="_blank" style="word-break: break-all; font-size: 11px;">${eventUrl}&version=noiva</a></small>
+                            </div>
                             <div style="margin-top: 15px;">
                                 <button class="btn btn-small btn-secondary" onclick="editEvent('${event.id}')">Editar</button>
                                 <button class="btn btn-small btn-primary" onclick="viewResponses('${event.id}')">Ver Respostas</button>
                                 <button class="btn btn-small btn-success" onclick="downloadReport('${event.id}')">Baixar PDF</button>
+                                <button class="btn btn-small btn-secondary" onclick="manageGuests('${event.id}')">Gerenciar Convidados</button>
                                 <button class="btn btn-small ${event.active !== false ? 'btn-danger' : 'btn-success'}" onclick="toggleEventStatus('${event.id}', ${event.active === false})">${event.active !== false ? 'Desativar' : 'Ativar'}</button>
                                 <button class="btn btn-small btn-danger" onclick="deleteEvent('${event.id}')">Excluir</button>
                             </div>
@@ -1590,6 +1704,7 @@
                 cover_enabled: document.getElementById('eventCoverEnabled').checked,
                 cover_position_x: coverPosition.x,
                 cover_position_y: coverPosition.y,
+                site_version: document.getElementById('siteVersion').value,
                 user_id: currentUser.id
             };
 
@@ -1632,7 +1747,28 @@
                         .insert([eventData]);
                     
                     if (error) throw error;
-                    showNotification('Evento criado com sucesso!', 'success', 'eventNotification');
+                    const { data: newEvent } = await supabase
+                        .from('events')
+                        .select('id')
+                        .eq('user_id', currentUser.id)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single();
+                    
+                    if (newEvent) {
+                        const baseUrl = `${window.location.origin}${window.location.pathname}`;
+                        const linkNoivos = `${baseUrl}?event=${newEvent.id}&version=noivos`;
+                        const linkNoiva = `${baseUrl}?event=${newEvent.id}&version=noiva`;
+                        
+                        showNotification(`Evento criado com sucesso!<br><br>
+                            <strong>Links gerados:</strong><br>
+                            <small><strong>Convidados do Noivo:</strong><br>
+                            <a href="${linkNoivos}" target="_blank" style="word-break: break-all;">${linkNoivos}</a></small><br><br>
+                            <small><strong>Convidados da Noiva:</strong><br>
+                            <a href="${linkNoiva}" target="_blank" style="word-break: break-all;">${linkNoiva}</a></small>`, 'success', 'eventNotification');
+                    } else {
+                        showNotification('Evento criado com sucesso!', 'success', 'eventNotification');
+                    }
                 }
 
                 setTimeout(() => {
@@ -1676,6 +1812,7 @@
                 document.getElementById('maxCompanions').value = event.max_companions || 5;
                 document.getElementById('eventDescription').value = event.description || '';
                 document.getElementById('eventCoverEnabled').checked = event.cover_enabled;
+                document.getElementById('siteVersion').value = event.site_version || 'noivos';
                 
                 // Set cover position
                 if (event.cover_position_x !== undefined && event.cover_position_y !== undefined) {
@@ -1726,6 +1863,79 @@
             }
         }
 
+        async function manageGuests(eventId) {
+            try {
+                const { data: event, error: eventError } = await supabase
+                    .from('events')
+                    .select('*')
+                    .eq('id', eventId)
+                    .single();
+
+                if (eventError) throw eventError;
+
+                const { data: responses, error } = await supabase
+                    .from('responses')
+                    .select('*')
+                    .eq('event_id', eventId)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const attending = responses.filter(r => r.attending);
+
+                let html = `
+                    <div class="card">
+                        <h3>👥 ${event.name} - Gerenciar Convidados</h3>
+                        <p><strong>Confirmados:</strong> ${attending.length} pessoas</p>
+                        
+                        <h4 style="margin-top: 20px; color: #28a745;">✅ Convidados Confirmados</h4>
+                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
+                            ${attending.map(r => `
+                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${r.guest_name}</strong>
+                                        <span style="margin-left: 10px; padding: 2px 6px; border-radius: 10px; font-size: 10px; background: ${r.guest_type === 'noivo' ? '#667eea' : '#ff9a9e'}; color: white;">
+                                            ${r.guest_type === 'noivo' ? '🤵 NOIVO' : '👰 NOIVA'}
+                                        </span>
+                                        ${r.companions > 0 ? `<br><small style="color: #666;">+ ${r.companions} acompanhante(s)</small>` : ''}
+                                        <br><small style="color: #666;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
+                                    </div>
+                                    <button class="btn btn-small btn-danger" onclick="removeGuest('${eventId}', '${r.guest_name}')">🗑️ Remover</button>
+                                </div>
+                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma confirmação ainda.</p>'}
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-secondary btn-small" onclick="showUserDashboard()">Voltar</button>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('userEvents').innerHTML = html;
+            } catch (error) {
+                showNotification('Erro ao carregar convidados: ' + error.message, 'error', 'userNotification');
+            }
+        }
+
+        async function removeGuest(eventId, guestName) {
+            if (!confirm(`Tem certeza que deseja remover ${guestName} da lista de convidados?`)) return;
+
+            try {
+                const { error } = await supabase
+                    .from('responses')
+                    .delete()
+                    .eq('event_id', eventId)
+                    .eq('guest_name', guestName);
+
+                if (error) throw error;
+
+                showNotification('Convidado removido com sucesso!', 'success', 'userNotification');
+                await manageGuests(eventId);
+            } catch (error) {
+                showNotification('Erro ao remover convidado: ' + error.message, 'error', 'userNotification');
+            }
+        }
+
         async function viewResponses(eventId) {
             try {
                 const { data: event, error: eventError } = await supabase
@@ -1746,7 +1956,11 @@
 
                 const attending = responses.filter(r => r.attending);
                 const notAttending = responses.filter(r => !r.attending);
+                const attendingNoivo = attending.filter(r => r.guest_type === 'noivo');
+                const attendingNoiva = attending.filter(r => r.guest_type === 'noiva');
                 const totalCompanions = attending.reduce((sum, r) => sum + (r.companions || 0), 0);
+                const companionsNoivo = attendingNoivo.reduce((sum, r) => sum + (r.companions || 0), 0);
+                const companionsNoiva = attendingNoiva.reduce((sum, r) => sum + (r.companions || 0), 0);
 
                 let html = `
                     <div class="card">
@@ -1756,15 +1970,26 @@
                         <p><strong>Total de respostas:</strong> ${responses.length}</p>
                         <p><strong>Limite do evento:</strong> ${event.event_limit}</p>
                         
-                        <h4 style="margin-top: 20px; color: #28a745;">✅ Confirmados (${attending.length})</h4>
-                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
-                            ${attending.map(r => `
+                        <h4 style="margin-top: 20px; color: #667eea;">🤵 Convidados do Noivo (${attendingNoivo.length} + ${companionsNoivo} acompanhantes)</h4>
+                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
+                            ${attendingNoivo.map(r => `
                                 <div style="padding: 10px; border-bottom: 1px solid #eee;">
                                     <strong>${r.guest_name}</strong>
                                     ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
                                     <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
                                 </div>
-                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma confirmação ainda.</p>'}
+                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhum convidado do noivo confirmado.</p>'}
+                        </div>
+                        
+                        <h4 style="margin-top: 20px; color: #ff9a9e;">👰 Convidados da Noiva (${attendingNoiva.length} + ${companionsNoiva} acompanhantes)</h4>
+                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
+                            ${attendingNoiva.map(r => `
+                                <div style="padding: 10px; border-bottom: 1px solid #eee;">
+                                    <strong>${r.guest_name}</strong>
+                                    ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
+                                    <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
+                                </div>
+                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhum convidado da noiva confirmado.</p>'}
                         </div>
                         
                         <h4 style="margin-top: 20px; color: #dc3545;">❌ Não comparecerão (${notAttending.length})</h4>
@@ -1810,7 +2035,11 @@
 
                 const attending = responses.filter(r => r.attending);
                 const notAttending = responses.filter(r => !r.attending);
+                const attendingNoivo = attending.filter(r => r.guest_type === 'noivo');
+                const attendingNoiva = attending.filter(r => r.guest_type === 'noiva');
                 const totalCompanions = attending.reduce((sum, r) => sum + (r.companions || 0), 0);
+                const companionsNoivo = attendingNoivo.reduce((sum, r) => sum + (r.companions || 0), 0);
+                const companionsNoiva = attendingNoiva.reduce((sum, r) => sum + (r.companions || 0), 0);
 
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
@@ -1901,15 +2130,15 @@
 
                 yPos += 65;
 
-                // Confirmed attendees section
-                if (attending.length > 0) {
-                    doc.setFillColor(...successColor);
+                // Confirmed attendees section - Noivo
+                if (attendingNoivo.length > 0) {
+                    doc.setFillColor(...primaryColor);
                     doc.rect(15, yPos - 5, 180, 15, 'F');
                     
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(`LISTA DE CONFIRMADOS (${attending.length})`, 20, yPos + 5);
+                    doc.text(`CONVIDADOS DO NOIVO (${attendingNoivo.length} + ${companionsNoivo} acompanhantes)`, 20, yPos + 5);
 
                     yPos += 20;
 
@@ -1917,7 +2146,65 @@
                     doc.setFontSize(10);
                     doc.setFont('helvetica', 'normal');
 
-                    attending.forEach((response, index) => {
+                    attendingNoivo.forEach((response, index) => {
+                        if (yPos > 270) {
+                            doc.addPage();
+                            yPos = 30;
+                        }
+
+                        // Alternating row colors
+                        if (index % 2 === 0) {
+                            doc.setFillColor(248, 249, 250);
+                            doc.rect(15, yPos - 3, 180, 12, 'F');
+                        }
+
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${index + 1}.`, 20, yPos + 5);
+                        doc.text(cleanText(response.guest_name), 30, yPos + 5);
+
+                        if (response.companions > 0) {
+                            doc.setFont('helvetica', 'normal');
+                            doc.setTextColor(...primaryColor);
+                            doc.text(`+ ${response.companions} acompanhante${response.companions > 1 ? 's' : ''}`, 120, yPos + 5);
+                            
+                            if (response.companion_names && response.companion_names.length > 0) {
+                                doc.setFontSize(8);
+                                doc.setTextColor(...grayColor);
+                                const cleanNames = response.companion_names.map(name => cleanText(name)).join(', ');
+                                doc.text(`(${cleanNames})`, 30, yPos + 10);
+                                yPos += 5;
+                            }
+                        }
+
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(10);
+                        yPos += 15;
+                    });
+                }
+
+                // Confirmed attendees section - Noiva
+                if (attendingNoiva.length > 0) {
+                    yPos += 10;
+                    if (yPos > 250) {
+                        doc.addPage();
+                        yPos = 30;
+                    }
+
+                    doc.setFillColor(255, 154, 158); // Pink color for noiva
+                    doc.rect(15, yPos - 5, 180, 15, 'F');
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`CONVIDADOS DA NOIVA (${attendingNoiva.length} + ${companionsNoiva} acompanhantes)`, 20, yPos + 5);
+
+                    yPos += 20;
+
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+
+                    attendingNoiva.forEach((response, index) => {
                         if (yPos > 270) {
                             doc.addPage();
                             yPos = 30;
@@ -2071,6 +2358,7 @@
                                 </button>
                                 <button class="btn btn-small btn-secondary" onclick="viewUserPassword('${user.id}')">👁️ Ver Senha</button>
                                 <button class="btn btn-small btn-secondary" onclick="changeUserPassword('${user.id}')">🔐 Alterar Senha</button>
+                                <button class="btn btn-small btn-danger" onclick="deleteUser('${user.id}')">🗑️ Eliminar</button>
                             </div>
                         </div>
                     </div>
@@ -2201,6 +2489,24 @@
             }
         }
 
+        async function deleteUser(userId) {
+            if (!confirm('Tem certeza que deseja eliminar este usuário? Esta ação não pode ser desfeita.')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .delete()
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                showNotification('Usuário eliminado com sucesso!', 'success', 'adminNotification');
+                await loadAdminData();
+            } catch (error) {
+                showNotification('Erro ao eliminar usuário: ' + error.message, 'error', 'adminNotification');
+            }
+        }
+
         async function viewEventResponsesAdmin(eventId) {
             await viewResponses(eventId);
         }
@@ -2325,7 +2631,7 @@
 
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.textContent = message;
+            notification.innerHTML = message;
 
             if (containerId === 'guestContent') {
                 container.insertBefore(notification, container.firstChild);
@@ -2337,7 +2643,7 @@
                 if (notification.parentNode) {
                     notification.remove();
                 }
-            }, 5000);
+            }, 8000);
         }
 
         function formatDate(date) {
@@ -2368,5 +2674,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974e1ca0f26677e0',t:'MTc1NjE1NjYwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974e2bd360ad77d7',t:'MTc1NjE1NzIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
