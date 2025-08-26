@@ -1338,22 +1338,52 @@
                 };
 
                 if (editingResponse) {
-                    // Update existing response
+                    // Get the original response to use the correct guest name for update
+                    const originalResponse = getGuestResponse(currentEvent.id);
+                    
+                    // Update existing response using the original guest name
                     const { error } = await supabase
                         .from('responses')
                         .update(responseData)
                         .eq('event_id', currentEvent.id)
-                        .eq('guest_name', guestName);
+                        .eq('guest_name', originalResponse.guest_name);
                     
                     if (error) throw error;
                     editingResponse = false;
-                } else {
-                    // Insert new response
-                    const { error } = await supabase
-                        .from('responses')
-                        .insert([responseData]);
                     
-                    if (error) throw error;
+                    showNotification('Resposta atualizada com sucesso!', 'success');
+                } else {
+                    // Check if response already exists in database
+                    const { data: existingResponse } = await supabase
+                        .from('responses')
+                        .select('*')
+                        .eq('event_id', currentEvent.id)
+                        .eq('guest_name', guestName)
+                        .single();
+
+                    if (existingResponse) {
+                        // Update existing response
+                        const { error } = await supabase
+                            .from('responses')
+                            .update(responseData)
+                            .eq('event_id', currentEvent.id)
+                            .eq('guest_name', guestName);
+                        
+                        if (error) throw error;
+                        showNotification('Resposta atualizada com sucesso!', 'success');
+                    } else {
+                        // Insert new response
+                        const { error } = await supabase
+                            .from('responses')
+                            .insert([responseData]);
+                        
+                        if (error) throw error;
+                        
+                        let message = currentAttending 
+                            ? 'Presença confirmada, grato!'
+                            : 'Resposta enviada, grato!';
+                        showNotification(message, 'success');
+                    }
                 }
 
                 // Save to localStorage
@@ -1361,20 +1391,11 @@
                 responses[currentEvent.id] = responseData;
                 localStorage.setItem('eventResponses', JSON.stringify(responses));
 
-                let message = currentAttending 
-                    ? 'Presença confirmada, grato!'
-                    : 'Resposta enviada, grato!';
-
-                showNotification(message, 'success');
                 setTimeout(() => {
                     renderGuestEvent(currentEvent);
                 }, 2000);
             } catch (error) {
-                if (error.code === '23505') {
-                    showNotification('Você já respondeu a este evento. Use a opção "Editar Resposta" se disponível.', 'error');
-                } else {
-                    showNotification('Erro ao salvar resposta: ' + error.message, 'error');
-                }
+                showNotification('Erro ao salvar resposta: ' + error.message, 'error');
             }
         }
 
@@ -2702,5 +2723,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975550a836d677da',t:'MTc1NjIzMjEzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9755599ef1bb77da',t:'MTc1NjIzMjQ5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
