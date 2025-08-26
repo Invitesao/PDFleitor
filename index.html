@@ -547,6 +547,7 @@
                 <button class="btn btn-primary" onclick="showLogin()">Login</button>
             </div>
             <div class="login-button-top" id="logoutButtonTop" style="display: none;">
+                <button class="btn btn-secondary" onclick="goToProfile()" style="margin-right: 10px;">Perfil</button>
                 <button class="btn btn-secondary" onclick="logout()">Sair</button>
             </div>
             <div class="card">
@@ -2014,6 +2015,22 @@
                             `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma confirmação ainda.</p>'}
                         </div>
                         
+                        <h4 style="margin-top: 20px; color: #dc3545;">❌ Não Comparecerão</h4>
+                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
+                            ${responses.filter(r => !r.attending).map(r => `
+                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${r.guest_name}</strong>
+                                        <span style="margin-left: 10px; padding: 2px 6px; border-radius: 10px; font-size: 10px; background: ${r.guest_type === 'noivo' ? '#667eea' : '#ff9a9e'}; color: white;">
+                                            ${r.guest_type === 'noivo' ? '🤵 NOIVO' : '👰 NOIVA'}
+                                        </span>
+                                        <br><small style="color: #666;">Respondido em: ${formatDate(new Date(r.created_at))}</small>
+                                    </div>
+                                    <button class="btn btn-small btn-danger" onclick="removeGuest('${eventId}', '${r.guest_name}')">🗑️ Remover</button>
+                                </div>
+                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma resposta negativa ainda.</p>'}
+                        </div>
+                        
                         <div style="margin-top: 20px;">
                             <button class="btn btn-secondary btn-small" onclick="showUserDashboard()">Voltar</button>
                         </div>
@@ -2697,6 +2714,16 @@
             }
         }
 
+        function goToProfile() {
+            if (!currentUser) return;
+            
+            if (currentUser.isAdmin) {
+                showAdminDashboard();
+            } else {
+                showUserDashboard();
+            }
+        }
+
         function showLogin() {
             hideAllViews();
             document.getElementById('loginView').classList.remove('hidden');
@@ -2824,5 +2851,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9755fe46d05f77da',t:'MTc1NjIzOTI0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97561d1c026077e3',t:'MTc1NjI0MDUwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
