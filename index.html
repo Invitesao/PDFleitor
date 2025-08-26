@@ -546,6 +546,9 @@
             <div class="login-button-top" id="loginButtonTop">
                 <button class="btn btn-primary" onclick="showLogin()">Login</button>
             </div>
+            <div class="login-button-top" id="logoutButtonTop" style="display: none;">
+                <button class="btn btn-secondary" onclick="logout()">Sair</button>
+            </div>
             <div class="card">
                 <div class="logo">
                     <h1>🎉 InvitesAO</h1>
@@ -847,6 +850,10 @@
                     const user = JSON.parse(savedUser);
                     if (user.isAdmin) {
                         currentUser = user;
+                        // Auto-redirect admin to dashboard if not on event page
+                        if (!isEventPage) {
+                            setTimeout(() => showAdminDashboard(), 100);
+                        }
                         return;
                     }
                     
@@ -859,6 +866,21 @@
                     
                     if (dbUser && dbUser.approved && dbUser.active) {
                         currentUser = dbUser;
+                        // Update localStorage with fresh data
+                        localStorage.setItem('currentUser', JSON.stringify(dbUser));
+                        // Auto-redirect user to dashboard if not on event page
+                        if (!isEventPage) {
+                            setTimeout(() => showUserDashboard(), 100);
+                        }
+                    } else if (dbUser && !dbUser.approved) {
+                        currentUser = dbUser;
+                        // Auto-redirect to pending view if not approved
+                        if (!isEventPage) {
+                            setTimeout(() => {
+                                showPendingView();
+                                startApprovalCheck();
+                            }, 100);
+                        }
                     } else {
                         localStorage.removeItem('currentUser');
                     }
@@ -1014,20 +1036,11 @@
                 await loadGuestEvent(eventId);
             } else {
                 isEventPage = false;
-                // Show welcome screen for non-event pages
+                // Show welcome screen for non-event pages initially
                 showWelcomeScreen();
                 
-                // Check if user is logged in and redirect accordingly
-                if (currentUser) {
-                    if (currentUser.isAdmin) {
-                        showAdminDashboard();
-                    } else if (currentUser.approved) {
-                        showUserDashboard();
-                    } else {
-                        showPendingView();
-                        startApprovalCheck();
-                    }
-                }
+                // The auto-redirect will be handled by checkSavedLogin()
+                // No need to manually redirect here as it's already done in checkSavedLogin
             }
         }
 
@@ -1062,7 +1075,7 @@
                     applySiteVersionStyling();
                 }
                 
-                renderGuestEvent(event);
+                await renderGuestEvent(event);
                 showGuestView();
             } catch (error) {
                 document.getElementById('guestContent').innerHTML = `
@@ -1087,10 +1100,13 @@
             `;
         }
 
-        function renderGuestEvent(event) {
+        async function renderGuestEvent(event) {
             const now = new Date();
             const eventDate = new Date(event.event_date);
             const deadline = new Date(event.deadline);
+            
+            // Update login/logout buttons
+            updateLoginButtons();
             
             let coverHtml = '';
             if (event.cover_enabled && event.cover_url) {
@@ -1108,7 +1124,7 @@
                 deadlineStatus = '<div class="notification error">Prazo para confirmação expirado</div>';
             }
 
-            const guestResponse = getGuestResponse(event.id);
+            const guestResponse = await getGuestResponse(event.id);
             let responseSection = '';
 
             if (guestResponse) {
@@ -1407,24 +1423,53 @@
                 responses[currentEvent.id] = responseData;
                 localStorage.setItem('eventResponses', JSON.stringify(responses));
 
-                setTimeout(() => {
-                    renderGuestEvent(currentEvent);
+                setTimeout(async () => {
+                    await renderGuestEvent(currentEvent);
                 }, 2000);
             } catch (error) {
                 showNotification('Erro ao salvar resposta: ' + error.message, 'error');
             }
         }
 
-        function cancelResponse() {
+        async function cancelResponse() {
             currentAttending = null;
             editingResponse = false;
             // Reload the event to show the original state
-            renderGuestEvent(currentEvent);
+            await renderGuestEvent(currentEvent);
         }
 
-        function getGuestResponse(eventId) {
+        async function getGuestResponse(eventId) {
+            // First check localStorage
             const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
-            return responses[eventId] || null;
+            const localResponse = responses[eventId];
+            
+            if (localResponse) {
+                // Verify if response still exists in database
+                try {
+                    const { data: dbResponse } = await supabase
+                        .from('responses')
+                        .select('*')
+                        .eq('event_id', eventId)
+                        .eq('guest_name', localResponse.guest_name)
+                        .single();
+                    
+                    if (dbResponse) {
+                        return localResponse;
+                    } else {
+                        // Response was deleted from database, remove from localStorage
+                        delete responses[eventId];
+                        localStorage.setItem('eventResponses', JSON.stringify(responses));
+                        return null;
+                    }
+                } catch (error) {
+                    // Response doesn't exist in database, remove from localStorage
+                    delete responses[eventId];
+                    localStorage.setItem('eventResponses', JSON.stringify(responses));
+                    return null;
+                }
+            }
+            
+            return null;
         }
 
         function canEditResponse(createdAt) {
@@ -1448,8 +1493,8 @@
             }
         }
 
-        function editResponse() {
-            const response = getGuestResponse(currentEvent.id);
+        async function editResponse() {
+            const response = await getGuestResponse(currentEvent.id);
             if (response && canEditResponse(response.created_at)) {
                 // Clear the current form and show the edit form
                 const guestNameInput = document.getElementById('guestName');
@@ -1546,8 +1591,8 @@
         // Authentication Functions
         async function handleLogin(e) {
             e.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
 
             // Check admin credentials
             if (username === 'Invites' && password === '#Invites2025@!!1995') {
@@ -1592,10 +1637,10 @@
 
         async function handleRegister(e) {
             e.preventDefault();
-            const name = document.getElementById('registerName').value;
-            const username = document.getElementById('registerUsername').value;
-            const phone = document.getElementById('registerPhone').value;
-            const password = document.getElementById('registerPassword').value;
+            const name = document.getElementById('registerName').value.trim();
+            const username = document.getElementById('registerUsername').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
 
             try {
                 // Check if username already exists
@@ -1992,6 +2037,13 @@
                     .eq('guest_name', guestName);
 
                 if (error) throw error;
+
+                // Remove from localStorage as well
+                const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
+                if (responses[eventId] && responses[eventId].guest_name === guestName) {
+                    delete responses[eventId];
+                    localStorage.setItem('eventResponses', JSON.stringify(responses));
+                }
 
                 showNotification('Convidado removido com sucesso!', 'success', 'userNotification');
                 await manageGuests(eventId);
@@ -2625,6 +2677,24 @@
             hideAllViews();
             document.getElementById('guestView').classList.remove('hidden');
             updateBodyClass();
+            updateLoginButtons();
+        }
+
+        function updateLoginButtons() {
+            const loginBtn = document.getElementById('loginButtonTop');
+            const logoutBtn = document.getElementById('logoutButtonTop');
+            
+            if (currentUser && isEventPage) {
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'block';
+            } else if (!currentUser && isEventPage) {
+                loginBtn.style.display = 'block';
+                logoutBtn.style.display = 'none';
+            } else {
+                // Hide both buttons when not on event page
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'none';
+            }
         }
 
         function showLogin() {
@@ -2754,5 +2824,5 @@
             }
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9755754fe2c777da',t:'MTc1NjIzMzYzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9755fe46d05f77da',t:'MTc1NjIzOTI0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
