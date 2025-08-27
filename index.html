@@ -15,14 +15,29 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
         }
 
-        /* Admin and login pages keep gradient background */
-        body.admin-page {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        body.guest-mode {
+            background: white;
+        }
+
+        body.version-noiva {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+        }
+
+        body.version-noiva .btn-primary {
+            background: linear-gradient(135deg, #ff9a9e 0%, #f093fb 100%);
+        }
+
+        body.version-noiva .stats-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #f093fb 100%);
+        }
+
+        body.version-noiva .logo h1 {
+            color: #ff6b9d;
         }
 
         .container {
@@ -156,12 +171,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        .notification.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
         .event-card {
             background: white;
             border-radius: 15px;
@@ -176,15 +185,13 @@
             border-radius: 12px;
             margin-bottom: 20px;
             overflow: hidden;
-            position: relative;
             background: #f8f9fa;
         }
 
         .event-cover img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            background: #f8f9fa;
+            object-fit: cover;
         }
 
         .countdown {
@@ -195,12 +202,6 @@
             border-radius: 15px;
             text-align: center;
             margin: 20px 0;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .countdown h3 {
-            margin-bottom: 20px;
-            font-size: 1.2em;
         }
 
         .countdown-grid {
@@ -239,27 +240,32 @@
             margin: 30px 0;
         }
 
-        .response-question {
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
         .response-buttons {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 15px 0;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
         }
 
-        .response-buttons .btn {
-            font-size: 1em;
-            padding: 12px;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .response-btn {
+            padding: 15px 30px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .response-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .response-btn:hover {
+            border-color: #667eea;
         }
 
         .guest-form {
@@ -269,55 +275,34 @@
             margin: 20px 0;
         }
 
-        .deadline-text {
-            text-align: center;
-            font-size: 0.95em;
-            color: #666;
-            margin: 15px 0;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-        }
-
-        .deadline-date {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
-            margin-top: 5px;
-        }
-
-        .footer {
-            text-align: center;
+        .response-status {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
             padding: 20px;
-            color: white;
-            font-size: 14px;
-            margin-top: auto;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
         }
 
-        .login-button-top {
+        .response-status.negative {
+            background: #ffeaea;
+            border-color: #f44336;
+        }
+
+        .top-nav {
             position: absolute;
             top: 20px;
             right: 20px;
             z-index: 1000;
+            display: flex;
+            gap: 10px;
         }
 
-        .login-button-top .btn {
-            padding: 8px 16px;
-            font-size: 14px;
-            width: auto;
-        }
-
-        .back-button {
+        .back-nav {
             position: absolute;
             top: 20px;
             left: 20px;
             z-index: 1000;
-        }
-
-        .back-button .btn {
-            padding: 8px 16px;
-            font-size: 14px;
-            width: auto;
         }
 
         .admin-header {
@@ -344,11 +329,6 @@
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-5px);
         }
 
         .stats-number {
@@ -384,18 +364,26 @@
             font-weight: 600;
         }
 
-        .companions-input {
-            margin-top: 15px;
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
         }
 
-        .edit-timer {
-            background: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 14px;
-            text-align: center;
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
         .checkbox-group {
@@ -408,133 +396,86 @@
             width: auto;
         }
 
-        .pending-approval {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 15px 0;
         }
 
-        .pending-approval .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .radio-group input[type="radio"] {
+            width: auto;
         }
 
-        .response-status {
-            background: #e8f5e8;
-            border: 2px solid #4caf50;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .response-status.negative {
-            background: #ffeaea;
-            border-color: #f44336;
-        }
-
-        .companions-names {
+        .companions-section {
             margin-top: 15px;
         }
 
-        .companions-names input {
+        .companion-item {
+            display: flex;
+            gap: 10px;
             margin-bottom: 10px;
+            align-items: center;
         }
 
-        .cover-container {
-            position: relative;
-            width: 100%;
-            height: 200px;
-            border: 2px dashed #ddd;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #f8f9fa;
-            cursor: move;
+        .companion-item input {
+            flex: 1;
         }
 
-        .cover-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            cursor: move;
-            user-select: none;
-            transition: transform 0.1s ease;
-        }
-
-        .position-indicator {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
+        .footer {
+            text-align: center;
+            padding: 20px;
             color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            pointer-events: none;
+            font-size: 14px;
+            margin-top: auto;
         }
 
-        .page-title {
-            font-size: 1.3em !important;
-            margin-bottom: 20px;
-        }
-
-        /* Version-specific styles */
-        .version-noivos {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .version-noiva {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-        }
-
-        .version-noiva .btn-primary {
-            background: linear-gradient(135deg, #ff9a9e 0%, #f093fb 100%);
-        }
-
-        .version-noiva .btn-primary:hover {
-            box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
-        }
-
-        .version-noiva .stats-card {
-            background: linear-gradient(135deg, #ff9a9e 0%, #f093fb 100%);
-        }
-
-        .version-noiva .countdown {
-            background: linear-gradient(135deg, #ff6b9d, #c44569);
-        }
-
-        .version-noiva input:focus, 
-        .version-noiva textarea:focus, 
-        .version-noiva select:focus {
-            border-color: #ff9a9e;
-            box-shadow: 0 0 0 3px rgba(255, 154, 158, 0.1);
-        }
-
-        .version-noiva .logo h1 {
-            color: #ff6b9d;
-        }
-
-        .version-noivos .logo h1 {
-            color: #667eea;
-        }
-
-        @media (min-width: 768px) {
-            .admin-container {
-                padding: 40px;
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
             }
             
-            .container {
-                max-width: 400px;
+            .admin-container {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .response-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .response-btn {
+                padding: 12px 20px;
+            }
+            
+            .top-nav {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+            
+            .back-nav {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 20px;
+            }
+            
+            .admin-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -543,12 +484,10 @@
     <div id="app">
         <!-- Guest Event View -->
         <div id="guestView" class="container">
-            <div class="login-button-top" id="loginButtonTop">
-                <button class="btn btn-primary" onclick="showLogin()">Login</button>
-            </div>
-            <div class="login-button-top" id="logoutButtonTop" style="display: none;">
-                <button class="btn btn-secondary" onclick="goToProfile()" style="margin-right: 10px;">Perfil</button>
-                <button class="btn btn-secondary" onclick="logout()">Sair</button>
+            <div class="top-nav" id="topNav">
+                <button class="btn btn-primary btn-small" onclick="showLogin()" id="loginBtn">Login</button>
+                <button class="btn btn-secondary btn-small hidden" onclick="goToProfile()" id="profileBtn">Perfil</button>
+                <button class="btn btn-secondary btn-small hidden" onclick="logout()" id="logoutBtn">Sair</button>
             </div>
             <div class="card">
                 <div class="logo">
@@ -556,9 +495,10 @@
                 </div>
                 <div id="guestContent">
                     <div style="text-align: center; padding: 40px;">
-                        <div class="spinner"></div>
-                        <h3>Carregando evento...</h3>
-                        <p style="color: #666;">Por favor, aguarde.</p>
+                        <h2>🎉 Bem-vindo ao InvitesAO</h2>
+                        <p style="margin: 20px 0; color: #666;">Sistema de confirmação de presença para seus eventos especiais.</p>
+                        <button class="btn btn-primary" onclick="showLogin()">Fazer Login</button>
+                        <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
                     </div>
                 </div>
             </div>
@@ -569,8 +509,8 @@
 
         <!-- Login Screen -->
         <div id="loginView" class="container hidden">
-            <div class="back-button">
-                <button class="btn btn-secondary" onclick="backToEvent()">← Voltar</button>
+            <div class="back-nav">
+                <button class="btn btn-secondary btn-small" onclick="backToMain()">← Voltar</button>
             </div>
             <div class="card">
                 <div class="logo">
@@ -584,14 +524,11 @@
                     </div>
                     <div class="form-group">
                         <label>Senha</label>
-                        <div style="position: relative;">
-                            <input type="password" id="loginPassword" required>
-                            <button type="button" onclick="togglePasswordVisibility('loginPassword')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
-                        </div>
+                        <input type="password" id="loginPassword" required>
                     </div>
                     <div class="checkbox-group" style="margin-bottom: 20px;">
                         <input type="checkbox" id="rememberLogin">
-                        <label for="rememberLogin">Lembrar dados de acesso</label>
+                        <label for="rememberLogin">Lembrar dados</label>
                     </div>
                     <button type="submit" class="btn btn-primary">Entrar</button>
                 </form>
@@ -604,8 +541,8 @@
 
         <!-- Register Screen -->
         <div id="registerView" class="container hidden">
-            <div class="back-button">
-                <button class="btn btn-secondary" onclick="backToEvent()">← Voltar</button>
+            <div class="back-nav">
+                <button class="btn btn-secondary btn-small" onclick="backToMain()">← Voltar</button>
             </div>
             <div class="card">
                 <div class="logo">
@@ -627,10 +564,7 @@
                     </div>
                     <div class="form-group">
                         <label>Senha</label>
-                        <div style="position: relative;">
-                            <input type="password" id="registerPassword" required>
-                            <button type="button" onclick="togglePasswordVisibility('registerPassword')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;">👁️</button>
-                        </div>
+                        <input type="password" id="registerPassword" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Criar Conta</button>
                 </form>
@@ -641,34 +575,14 @@
             </div>
         </div>
 
-        <!-- Pending Approval Screen -->
-        <div id="pendingView" class="container hidden">
-            <div class="back-button">
-                <button class="btn btn-secondary" onclick="logout()">← Voltar</button>
-            </div>
-            <div class="card">
-                <div class="logo">
-                    <h1>🎉 InvitesAO</h1>
-                </div>
-                <div class="pending-approval">
-                    <div class="spinner"></div>
-                    <h3>Aguardando Aprovação</h3>
-                    <p>Sua conta foi criada com sucesso!<br>Aguarde a aprovação do administrador.</p>
-                </div>
-            </div>
-            <div class="footer">
-                Copyright © invitesAO 2025
-            </div>
-        </div>
-
         <!-- User Dashboard -->
         <div id="userDashboard" class="container hidden">
-            <div class="back-button">
-                <button class="btn btn-secondary" onclick="logout()">← Sair</button>
+            <div class="back-nav">
+                <button class="btn btn-secondary btn-small" onclick="logout()">← Sair</button>
             </div>
             <div class="card">
                 <div class="logo">
-                    <h1 class="page-title">Meus Eventos</h1>
+                    <h1>Meus Eventos</h1>
                 </div>
                 <div id="userNotification"></div>
                 <button class="btn btn-primary" onclick="showCreateEvent()">Criar Novo Evento</button>
@@ -681,12 +595,12 @@
 
         <!-- Create/Edit Event -->
         <div id="createEventView" class="container hidden">
-            <div class="back-button">
-                <button class="btn btn-secondary" onclick="showUserDashboard()">← Voltar</button>
+            <div class="back-nav">
+                <button class="btn btn-secondary btn-small" onclick="showUserDashboard()">← Voltar</button>
             </div>
             <div class="card">
                 <div class="logo">
-                    <h1 id="eventFormTitle" class="page-title">Criar Evento</h1>
+                    <h1 id="eventFormTitle">Criar Evento</h1>
                 </div>
                 <div id="eventNotification"></div>
                 <form id="eventForm">
@@ -695,27 +609,16 @@
                         <input type="text" id="eventName" required>
                     </div>
                     <div class="form-group">
-                        <label>Data do Evento *</label>
+                        <label>Data do Evento</label>
                         <input type="date" id="eventDate" required>
-                        <div class="checkbox-group" style="margin-top: 10px;">
-                            <input type="checkbox" id="eventTimeEnabled">
-                            <label for="eventTimeEnabled">Incluir horário</label>
-                        </div>
-                        <input type="time" id="eventTime" class="hidden" style="margin-top: 10px;">
                     </div>
                     <div class="form-group">
                         <label>Data Limite para Confirmação</label>
                         <input type="date" id="eventDeadline" required>
-                        <div class="checkbox-group" style="margin-top: 10px;">
-                            <input type="checkbox" id="deadlineTimeEnabled">
-                            <label for="deadlineTimeEnabled">Incluir horário</label>
-                        </div>
-                        <input type="time" id="deadlineTime" class="hidden" style="margin-top: 10px;">
                     </div>
                     <div class="form-group">
-                        <label>Limite de Confirmações</label>
-                        <input type="number" id="eventLimit" min="0" required>
-                        <small style="color: #666; display: block; margin-top: 5px;">Digite 0 para sem limite</small>
+                        <label>Limite de Confirmações (0 = sem limite)</label>
+                        <input type="number" id="eventLimit" min="0" value="0" required>
                     </div>
                     <div class="form-group">
                         <label>Máximo de Acompanhantes por Convidado</label>
@@ -732,29 +635,6 @@
                             <option value="noiva">💐 Versão da Noiva (Rosa)</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="eventCoverEnabled">
-                            <label for="eventCoverEnabled">Permitir foto de capa</label>
-                        </div>
-                    </div>
-                    <div class="form-group hidden" id="coverUploadGroup">
-                        <label>Foto de Capa</label>
-                        <input type="file" id="eventCover" accept="image/*" onchange="previewCover()">
-                        <div id="coverPreview" class="hidden" style="margin-top: 15px;">
-                            <label>Posicionar imagem (arraste para ajustar):</label>
-                            <div id="coverContainer" class="cover-container">
-                                <img id="coverImage" class="cover-image">
-                                <div class="position-indicator">
-                                    Arraste para posicionar
-                                </div>
-                            </div>
-                            <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
-                                <button type="button" class="btn btn-small btn-secondary" onclick="resetCoverPosition()">Centralizar</button>
-                                <small style="color: #666;">Posição: <span id="positionDisplay">50%, 50%</span></small>
-                            </div>
-                        </div>
-                    </div>
                     <button type="submit" class="btn btn-primary">Salvar Evento</button>
                 </form>
             </div>
@@ -765,8 +645,8 @@
 
         <!-- Admin Dashboard -->
         <div id="adminDashboard" class="admin-container hidden">
-            <div class="back-button">
-                <button class="btn btn-secondary" onclick="logout()">← Sair</button>
+            <div class="back-nav">
+                <button class="btn btn-secondary btn-small" onclick="logout()">← Sair</button>
             </div>
             <div class="admin-header">
                 <h1>🔧 Painel Administrativo</h1>
@@ -788,33 +668,39 @@
                 </div>
                 <div class="stats-card">
                     <div class="stats-number" id="totalResponses">0</div>
-                    <div class="stats-label">📝 Confirmações Recebidas</div>
+                    <div class="stats-label">📝 Confirmações</div>
                 </div>
             </div>
 
-            <div class="card" style="margin-bottom: 25px;">
-                <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.4em;">⏳ Solicitações Pendentes</h3>
+            <div class="card">
+                <h3>⏳ Solicitações Pendentes</h3>
                 <div id="pendingRequests"></div>
             </div>
 
-            <div class="card" style="margin-bottom: 25px;">
-                <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.4em;">👥 Gerenciar Usuários</h3>
+            <div class="card">
+                <h3>👥 Gerenciar Usuários</h3>
                 <div id="userManagement"></div>
             </div>
 
-            <div class="card" style="margin-bottom: 25px;" id="adminOnlySection">
-                <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.4em;">🔧 Funções Administrativas</h3>
-                <p style="color: #666; margin-bottom: 15px;">Estas funções estão disponíveis apenas para administradores principais.</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn btn-secondary" onclick="exportAllData()">📊 Exportar Dados</button>
-                    <button class="btn btn-secondary" onclick="systemSettings()">⚙️ Configurações</button>
-                    <button class="btn btn-danger" onclick="systemMaintenance()">🔧 Manutenção</button>
-                </div>
-            </div>
-
-            <div class="card" style="margin-bottom: 25px;">
-                <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.4em;">🎉 Todos os Eventos</h3>
+            <div class="card">
+                <h3>🎉 Todos os Eventos</h3>
                 <div id="allEvents"></div>
+            </div>
+        </div>
+
+        <!-- Password Modal -->
+        <div id="passwordModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>🔐 Confirmação de Segurança</h3>
+                <p id="modalMessage">Para continuar, digite sua senha:</p>
+                <div class="form-group">
+                    <label>Sua Senha</label>
+                    <input type="password" id="modalPassword">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-danger" onclick="confirmPasswordAction()">Confirmar</button>
+                    <button class="btn btn-secondary" onclick="closePasswordModal()">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -829,33 +715,21 @@
         let currentUser = null;
         let currentEvent = null;
         let editingEventId = null;
-        let approvalCheckInterval = null;
-        let isEventPage = false;
-        let coverPosition = { x: 50, y: 50 };
-        let isDragging = false;
-        let dragStart = { x: 0, y: 0 };
         let currentAttending = null;
-        let editingResponse = false;
-        let currentSiteVersion = 'noivos'; // 'noivos' or 'noiva'
-        let rememberCredentials = false;
+        let pendingAction = null;
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', async () => {
             await checkSavedLogin();
             await loadEventFromUrl();
             setupEventListeners();
-            updateBodyClass();
         });
 
-        function updateBodyClass() {
-            const body = document.body;
-            const isGuestPage = !document.getElementById('guestView').classList.contains('hidden');
-            
-            if (isGuestPage && isEventPage) {
-                body.classList.remove('admin-page');
-            } else {
-                body.classList.add('admin-page');
-            }
+        // Setup Event Listeners
+        function setupEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            document.getElementById('eventForm').addEventListener('submit', handleEventSubmit);
         }
 
         // Check Saved Login
@@ -863,7 +737,6 @@
             const savedUser = localStorage.getItem('currentUser');
             const savedCredentials = localStorage.getItem('savedCredentials');
             
-            // Load saved credentials if available
             if (savedCredentials) {
                 try {
                     const credentials = JSON.parse(savedCredentials);
@@ -880,14 +753,9 @@
                     const user = JSON.parse(savedUser);
                     if (user.isAdmin) {
                         currentUser = user;
-                        // Auto-redirect admin to dashboard if not on event page
-                        if (!isEventPage) {
-                            setTimeout(() => showAdminDashboard(), 100);
-                        }
                         return;
                     }
                     
-                    // Verify user still exists and is active
                     const { data: dbUser } = await supabase
                         .from('users')
                         .select('*')
@@ -896,21 +764,7 @@
                     
                     if (dbUser && dbUser.approved && dbUser.active) {
                         currentUser = dbUser;
-                        // Update localStorage with fresh data
                         localStorage.setItem('currentUser', JSON.stringify(dbUser));
-                        // Auto-redirect user to dashboard if not on event page
-                        if (!isEventPage) {
-                            setTimeout(() => showUserDashboard(), 100);
-                        }
-                    } else if (dbUser && !dbUser.approved) {
-                        currentUser = dbUser;
-                        // Auto-redirect to pending view if not approved
-                        if (!isEventPage) {
-                            setTimeout(() => {
-                                showPendingView();
-                                startApprovalCheck();
-                            }, 100);
-                        }
                     } else {
                         localStorage.removeItem('currentUser');
                     }
@@ -920,160 +774,25 @@
             }
         }
 
-        // Apply Site Version Styling
-        function applySiteVersionStyling() {
-            const body = document.body;
-            
-            // Remove existing version classes
-            body.classList.remove('version-noivos', 'version-noiva');
-            
-            if (currentSiteVersion === 'noiva') {
-                body.classList.add('version-noiva');
-                // Update logo text
-                const logoElements = document.querySelectorAll('.logo h1');
-                logoElements.forEach(logo => {
-                    logo.innerHTML = '🎉 InvitesAO';
-                });
-            } else {
-                body.classList.add('version-noivos');
-                // Update logo text
-                const logoElements = document.querySelectorAll('.logo h1');
-                logoElements.forEach(logo => {
-                    logo.innerHTML = '🎉 InvitesAO';
-                });
-            }
-        }
-
-        // Setup Event Listeners
-        function setupEventListeners() {
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('registerForm').addEventListener('submit', handleRegister);
-            document.getElementById('eventForm').addEventListener('submit', handleEventSubmit);
-            document.getElementById('eventCoverEnabled').addEventListener('change', toggleCoverUpload);
-            document.getElementById('eventTimeEnabled').addEventListener('change', toggleEventTime);
-            document.getElementById('deadlineTimeEnabled').addEventListener('change', toggleDeadlineTime);
-        }
-
-        // Cover Image Functions
-        function previewCover() {
-            const file = document.getElementById('eventCover').files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const coverImage = document.getElementById('coverImage');
-                    coverImage.src = e.target.result;
-                    document.getElementById('coverPreview').classList.remove('hidden');
-                    setupImageDragging();
-                    resetCoverPosition();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function setupImageDragging() {
-            const coverImage = document.getElementById('coverImage');
-            const container = document.getElementById('coverContainer');
-
-            coverImage.addEventListener('mousedown', startDrag);
-            coverImage.addEventListener('touchstart', startDrag);
-
-            function startDrag(e) {
-                e.preventDefault();
-                isDragging = true;
-                
-                const clientX = e.clientX || e.touches[0].clientX;
-                const clientY = e.clientY || e.touches[0].clientY;
-                
-                dragStart.x = clientX;
-                dragStart.y = clientY;
-
-                document.addEventListener('mousemove', drag);
-                document.addEventListener('touchmove', drag);
-                document.addEventListener('mouseup', stopDrag);
-                document.addEventListener('touchend', stopDrag);
-            }
-
-            function drag(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-
-                const clientX = e.clientX || e.touches[0].clientX;
-                const clientY = e.clientY || e.touches[0].clientY;
-                
-                const deltaX = clientX - dragStart.x;
-                const deltaY = clientY - dragStart.y;
-
-                const containerRect = container.getBoundingClientRect();
-
-                // Calculate new position as percentage
-                const newX = coverPosition.x + (deltaX / containerRect.width) * 100;
-                const newY = coverPosition.y + (deltaY / containerRect.height) * 100;
-
-                // Constrain to bounds
-                coverPosition.x = Math.max(-50, Math.min(150, newX));
-                coverPosition.y = Math.max(-50, Math.min(150, newY));
-
-                updateImagePosition();
-                updatePositionDisplay();
-
-                dragStart.x = clientX;
-                dragStart.y = clientY;
-            }
-
-            function stopDrag() {
-                isDragging = false;
-                document.removeEventListener('mousemove', drag);
-                document.removeEventListener('touchmove', drag);
-                document.removeEventListener('mouseup', stopDrag);
-                document.removeEventListener('touchend', stopDrag);
-            }
-        }
-
-        function updateImagePosition() {
-            const coverImage = document.getElementById('coverImage');
-            coverImage.style.objectPosition = `${coverPosition.x}% ${coverPosition.y}%`;
-        }
-
-        function updatePositionDisplay() {
-            document.getElementById('positionDisplay').textContent = 
-                `${Math.round(coverPosition.x)}%, ${Math.round(coverPosition.y)}%`;
-        }
-
-        function resetCoverPosition() {
-            coverPosition = { x: 50, y: 50 };
-            updateImagePosition();
-            updatePositionDisplay();
-        }
-
-        // Event Functions
+        // Load Event from URL
         async function loadEventFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const eventId = urlParams.get('event');
             const version = urlParams.get('version');
             
-            // Set site version based on URL parameter
             if (version === 'noiva') {
-                currentSiteVersion = 'noiva';
-            } else {
-                currentSiteVersion = 'noivos';
+                document.body.classList.add('version-noiva');
             }
             
-            // Apply version-specific styling
-            applySiteVersionStyling();
-            
             if (eventId) {
-                isEventPage = true;
+                document.body.classList.add('guest-mode');
                 await loadGuestEvent(eventId);
             } else {
-                isEventPage = false;
-                // Show welcome screen for non-event pages initially
-                showWelcomeScreen();
-                
-                // The auto-redirect will be handled by checkSavedLogin()
-                // No need to manually redirect here as it's already done in checkSavedLogin
+                updateTopNav();
             }
         }
 
+        // Load Guest Event
         async function loadGuestEvent(eventId) {
             try {
                 const { data: event, error } = await supabase
@@ -1088,9 +807,7 @@
                     document.getElementById('guestContent').innerHTML = `
                         <div style="text-align: center; padding: 40px;">
                             <h2>⚠️ Evento Inativo</h2>
-                            <p style="color: #666;">Este evento foi temporariamente desativado pelo organizador.</p>
-                            <button class="btn btn-primary" onclick="showLogin()">Fazer Login</button>
-                            <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
+                            <p style="color: #666;">Este evento foi temporariamente desativado.</p>
                         </div>
                     `;
                     return;
@@ -1098,45 +815,27 @@
 
                 currentEvent = event;
                 
-                // Apply event's site version if not specified in URL
-                const urlParams = new URLSearchParams(window.location.search);
-                if (!urlParams.get('version') && event.site_version) {
-                    currentSiteVersion = event.site_version;
-                    applySiteVersionStyling();
+                if (event.site_version === 'noiva') {
+                    document.body.classList.add('version-noiva');
                 }
                 
                 await renderGuestEvent(event);
-                showGuestView();
+                updateTopNav();
             } catch (error) {
                 document.getElementById('guestContent').innerHTML = `
                     <div style="text-align: center; padding: 40px;">
                         <h2>❌ Evento não encontrado</h2>
-                        <p style="color: #666; margin-bottom: 50px; line-height: 1.6;">O link do evento pode estar incorreto ou o evento foi removido.</p>
-                        <button class="btn btn-primary" onclick="showLogin()">Fazer Login</button>
-                        <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
+                        <p style="color: #666;">O link pode estar incorreto ou o evento foi removido.</p>
                     </div>
                 `;
             }
         }
 
-        function showWelcomeScreen() {
-            document.getElementById('guestContent').innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <h2>🎉 Bem-vindo ao InvitesAO</h2>
-                    <p style="margin: 20px 0; color: #666;">Sistema de confirmação de presença para seus eventos especiais.</p>
-                    <button class="btn btn-primary" onclick="showLogin()">Fazer Login</button>
-                    <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
-                </div>
-            `;
-        }
-
+        // Render Guest Event
         async function renderGuestEvent(event) {
             const now = new Date();
             const eventDate = new Date(event.event_date);
             const deadline = new Date(event.deadline);
-            
-            // Update login/logout buttons
-            updateLoginButtons();
             
             let coverHtml = '';
             if (event.cover_enabled && event.cover_url) {
@@ -1149,16 +848,10 @@
                 `;
             }
 
-            let deadlineStatus = '';
-            if (now > deadline) {
-                deadlineStatus = '<div class="notification error">Prazo para confirmação expirado</div>';
-            }
-
             const guestResponse = await getGuestResponse(event.id);
             let responseSection = '';
 
             if (guestResponse) {
-                const canEdit = canEditResponse(guestResponse.created_at);
                 const statusClass = guestResponse.attending ? '' : 'negative';
                 const statusText = guestResponse.attending ? '✅ Presença confirmada!' : '❌ Você informou que não comparecerá';
                 
@@ -1176,38 +869,28 @@
                         <p><strong>Nome:</strong> ${guestResponse.guest_name}</p>
                         ${companionInfo}
                         <p style="margin-top: 15px;">Obrigado pela confirmação!</p>
-                        ${canEdit ? `
-                            <button class="btn btn-secondary" onclick="editResponse()" style="margin-top: 20px;">Editar Resposta</button>
-                            <div class="edit-timer">Você pode editar sua resposta por mais ${getRemainingEditTime(guestResponse.created_at)}</div>
-                        ` : ''}
                     </div>
                 `;
             } else if (now <= deadline) {
                 responseSection = `
                     <div class="guest-form">
                         <div class="response-section">
-                            <div class="response-question">Confirma Presença?</div>
-                            <div class="deadline-text">Favor confirmar até ${formatEventDate(deadline, event.deadline_time_enabled)}</div>
-                            <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="attendance" value="true" onchange="handleAttendanceChange(true)">
-                                    <span>SIM</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="attendance" value="false" onchange="handleAttendanceChange(false)">
-                                    <span>NÃO</span>
-                                </label>
+                            <h3>Confirma Presença?</h3>
+                            <p style="margin-bottom: 20px;">Favor confirmar até ${formatDate(deadline)}</p>
+                            <div class="response-buttons">
+                                <button class="response-btn" onclick="selectAttendance(true)">SIM</button>
+                                <button class="response-btn" onclick="selectAttendance(false)">NÃO</button>
                             </div>
                         </div>
                         <div id="guestDetailsForm" class="hidden">
                             <div class="form-group">
                                 <label>Você é convidado(a) do(a):</label>
-                                <div style="display: flex; gap: 20px; justify-content: center; margin: 15px 0;">
-                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <div class="radio-group">
+                                    <label>
                                         <input type="radio" name="guestType" value="noivo">
                                         <span>Noivo</span>
                                     </label>
-                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <label>
                                         <input type="radio" name="guestType" value="noiva">
                                         <span>Noiva</span>
                                     </label>
@@ -1217,38 +900,43 @@
                                 <label>Seu nome completo</label>
                                 <input type="text" id="guestName" required>
                             </div>
-                            <div id="companionsSection" class="hidden">
+                            <div id="companionsSection" class="companions-section hidden">
                                 <div class="form-group">
                                     <label>Acompanhantes</label>
                                     <div id="companionsList"></div>
-                                    <button type="button" class="btn btn-secondary btn-small" id="addCompanionBtn" onclick="addCompanion()" style="margin-top: 10px;">+ Incluir</button>
+                                    <button type="button" class="btn btn-secondary btn-small" onclick="addCompanion()">+ Adicionar Acompanhante</button>
                                 </div>
                             </div>
-                            <button class="btn btn-primary" onclick="submitResponse()">Enviar</button>
+                            <button class="btn btn-primary" onclick="submitResponse()">Confirmar</button>
                         </div>
                     </div>
                 `;
+            } else {
+                responseSection = `
+                    <div class="notification error">
+                        <h3>Prazo Expirado</h3>
+                        <p>O prazo para confirmação de presença já expirou.</p>
+                    </div>
+                `;
             }
-
-            const eventDateFormatted = formatEventDate(eventDate, event.time_enabled);
 
             document.getElementById('guestContent').innerHTML = `
                 ${coverHtml}
                 <h2 style="text-align: center; margin-bottom: 20px;">${event.name}</h2>
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <strong>Data: ${eventDateFormatted}</strong>
+                    <strong>Data: ${formatDate(eventDate)}</strong>
                 </div>
                 ${event.description ? `<p style="margin-bottom: 20px; text-align: center; color: #666;">${event.description}</p>` : ''}
                 
                 <div class="countdown" id="countdown"></div>
                 
-                ${deadlineStatus}
                 ${responseSection}
             `;
 
             startCountdown(eventDate);
         }
 
+        // Start Countdown
         function startCountdown(eventDate) {
             const countdownElement = document.getElementById('countdown');
             if (!countdownElement) return;
@@ -1294,12 +982,17 @@
             setInterval(updateCountdown, 1000);
         }
 
-        function updateCompanionNames() {
-            // Função removida - acompanhantes são definidos pelo organizador
-        }
-
-        function handleAttendanceChange(attending) {
+        // Select Attendance
+        function selectAttendance(attending) {
             currentAttending = attending;
+            
+            // Update button styles
+            document.querySelectorAll('.response-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            event.target.classList.add('selected');
+            
             const detailsForm = document.getElementById('guestDetailsForm');
             const companionsSection = document.getElementById('companionsSection');
             
@@ -1307,24 +1000,12 @@
             
             if (attending && currentEvent.max_companions > 0) {
                 companionsSection.classList.remove('hidden');
-                updateCompanionLimit();
             } else {
                 companionsSection.classList.add('hidden');
             }
         }
 
-        function updateCompanionLimit() {
-            const addBtn = document.getElementById('addCompanionBtn');
-            const companionsList = document.getElementById('companionsList');
-            const currentCompanions = companionsList.children.length;
-            
-            if (currentCompanions >= currentEvent.max_companions) {
-                addBtn.style.display = 'none';
-            } else {
-                addBtn.style.display = 'inline-block';
-            }
-        }
-
+        // Add Companion
         function addCompanion() {
             const companionsList = document.getElementById('companionsList');
             const currentCompanions = companionsList.children.length;
@@ -1335,33 +1016,24 @@
             }
             
             const companionDiv = document.createElement('div');
-            companionDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+            companionDiv.className = 'companion-item';
             companionDiv.innerHTML = `
-                <input type="text" placeholder="Nome do acompanhante" class="companion-input" style="flex: 1;">
+                <input type="text" placeholder="Nome do acompanhante" class="companion-input">
                 <button type="button" class="btn btn-small btn-danger" onclick="removeCompanion(this)">Remover</button>
             `;
             
             companionsList.appendChild(companionDiv);
-            updateCompanionLimit();
         }
 
+        // Remove Companion
         function removeCompanion(button) {
             button.parentElement.remove();
-            updateCompanionLimit();
         }
 
-
-
+        // Submit Response
         async function submitResponse() {
-            const guestNameInput = document.getElementById('guestName');
+            const guestName = document.getElementById('guestName').value.trim();
             const guestTypeRadio = document.querySelector('input[name="guestType"]:checked');
-
-            if (!guestNameInput) {
-                showNotification('Erro: Campo de nome não encontrado.', 'error');
-                return;
-            }
-
-            const guestName = guestNameInput.value.trim();
 
             if (!guestName) {
                 showNotification('Por favor, informe seu nome.', 'error');
@@ -1377,7 +1049,6 @@
             let companions = 0;
             let companionNames = [];
 
-            // Collect companion names
             if (currentAttending && currentEvent.max_companions > 0) {
                 const companionInputs = document.querySelectorAll('.companion-input');
                 companionInputs.forEach(input => {
@@ -1396,59 +1067,38 @@
                     attending: currentAttending,
                     companions: companions,
                     companion_names: companionNames,
-                    created_at: editingResponse ? getGuestResponse(currentEvent.id).created_at : new Date().toISOString()
+                    created_at: new Date().toISOString()
                 };
 
-                if (editingResponse) {
-                    // Get the original response to use the correct guest name for update
-                    const originalResponse = getGuestResponse(currentEvent.id);
-                    
-                    // Update existing response using the original guest name
+                const { data: existingResponse } = await supabase
+                    .from('responses')
+                    .select('*')
+                    .eq('event_id', currentEvent.id)
+                    .eq('guest_name', guestName)
+                    .single();
+
+                if (existingResponse) {
                     const { error } = await supabase
                         .from('responses')
                         .update(responseData)
                         .eq('event_id', currentEvent.id)
-                        .eq('guest_name', originalResponse.guest_name);
+                        .eq('guest_name', guestName);
                     
                     if (error) throw error;
-                    editingResponse = false;
-                    
                     showNotification('Resposta atualizada com sucesso!', 'success');
                 } else {
-                    // Check if response already exists in database
-                    const { data: existingResponse } = await supabase
+                    const { error } = await supabase
                         .from('responses')
-                        .select('*')
-                        .eq('event_id', currentEvent.id)
-                        .eq('guest_name', guestName)
-                        .single();
-
-                    if (existingResponse) {
-                        // Update existing response
-                        const { error } = await supabase
-                            .from('responses')
-                            .update(responseData)
-                            .eq('event_id', currentEvent.id)
-                            .eq('guest_name', guestName);
-                        
-                        if (error) throw error;
-                        showNotification('Resposta atualizada com sucesso!', 'success');
-                    } else {
-                        // Insert new response
-                        const { error } = await supabase
-                            .from('responses')
-                            .insert([responseData]);
-                        
-                        if (error) throw error;
-                        
-                        let message = currentAttending 
-                            ? 'Presença confirmada, grato!'
-                            : 'Resposta enviada, grato!';
-                        showNotification(message, 'success');
-                    }
+                        .insert([responseData]);
+                    
+                    if (error) throw error;
+                    
+                    const message = currentAttending 
+                        ? 'Presença confirmada, obrigado!'
+                        : 'Resposta enviada, obrigado!';
+                    showNotification(message, 'success');
                 }
 
-                // Save to localStorage
                 const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
                 responses[currentEvent.id] = responseData;
                 localStorage.setItem('eventResponses', JSON.stringify(responses));
@@ -1461,20 +1111,12 @@
             }
         }
 
-        async function cancelResponse() {
-            currentAttending = null;
-            editingResponse = false;
-            // Reload the event to show the original state
-            await renderGuestEvent(currentEvent);
-        }
-
+        // Get Guest Response
         async function getGuestResponse(eventId) {
-            // First check localStorage
             const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
             const localResponse = responses[eventId];
             
             if (localResponse) {
-                // Verify if response still exists in database
                 try {
                     const { data: dbResponse } = await supabase
                         .from('responses')
@@ -1486,13 +1128,11 @@
                     if (dbResponse) {
                         return localResponse;
                     } else {
-                        // Response was deleted from database, remove from localStorage
                         delete responses[eventId];
                         localStorage.setItem('eventResponses', JSON.stringify(responses));
                         return null;
                     }
                 } catch (error) {
-                    // Response doesn't exist in database, remove from localStorage
                     delete responses[eventId];
                     localStorage.setItem('eventResponses', JSON.stringify(responses));
                     return null;
@@ -1502,122 +1142,6 @@
             return null;
         }
 
-        function canEditResponse(createdAt) {
-            const created = new Date(createdAt);
-            const now = new Date();
-            const hoursPassed = (now - created) / (1000 * 60 * 60);
-            return hoursPassed < 24;
-        }
-
-        function getRemainingEditTime(createdAt) {
-            const created = new Date(createdAt);
-            const now = new Date();
-            const hoursPassed = (now - created) / (1000 * 60 * 60);
-            const hoursRemaining = 24 - hoursPassed;
-            
-            if (hoursRemaining > 1) {
-                return `${Math.floor(hoursRemaining)} horas`;
-            } else {
-                const minutesRemaining = Math.floor(hoursRemaining * 60);
-                return `${minutesRemaining} minutos`;
-            }
-        }
-
-        async function editResponse() {
-            const response = await getGuestResponse(currentEvent.id);
-            if (response && canEditResponse(response.created_at)) {
-                // Clear the current form and show the edit form
-                const guestNameInput = document.getElementById('guestName');
-                if (guestNameInput) {
-                    guestNameInput.value = response.guest_name;
-                }
-                
-                currentAttending = response.attending;
-                editingResponse = true;
-                
-                // Show the form again
-                const responseSection = `
-                    <div class="guest-form">
-                        <div class="form-group">
-                            <label>Você é convidado(a) do(a):</label>
-                            <div style="display: flex; gap: 20px; justify-content: center; margin: 15px 0;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="guestType" value="noivo" ${response.guest_type === 'noivo' ? 'checked' : ''}>
-                                    <span>Noivo</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="guestType" value="noiva" ${response.guest_type === 'noiva' ? 'checked' : ''}>
-                                    <span>Noiva</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Seu nome completo</label>
-                            <input type="text" id="guestName" value="${response.guest_name}" required>
-                        </div>
-                        <div class="response-section">
-                            <div class="response-question">Confirma Presença?</div>
-                            <div class="deadline-text">Favor confirmar até ${formatEventDate(new Date(currentEvent.deadline), currentEvent.deadline_time_enabled)}</div>
-                            <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="attendance" value="true" ${response.attending ? 'checked' : ''} onchange="handleAttendanceChange(true)">
-                                    <span>SIM</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="attendance" value="false" ${!response.attending ? 'checked' : ''} onchange="handleAttendanceChange(false)">
-                                    <span>NÃO</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div id="guestDetailsForm">
-                            <div id="companionsSection" class="${response.attending && currentEvent.max_companions > 0 ? '' : 'hidden'}">
-                                <div class="form-group">
-                                    <label>Acompanhantes</label>
-                                    <div id="companionsList"></div>
-                                    <button type="button" class="btn btn-secondary btn-small" id="addCompanionBtn" onclick="addCompanion()" style="margin-top: 10px;">+ Incluir</button>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary" onclick="submitResponse()">Confirmar Alteração</button>
-                            <button class="btn btn-secondary" onclick="cancelResponse()">Cancelar</button>
-                        </div>
-                    </div>
-                `;
-                
-                // Find the response status div and replace it
-                const responseStatusDiv = document.querySelector('.response-status');
-                if (responseStatusDiv) {
-                    responseStatusDiv.outerHTML = responseSection;
-                }
-                
-                // Pre-select the current response and restore companions
-                setTimeout(() => {
-                    currentAttending = response.attending;
-                    
-                    // If there were companions, restore them
-                    if (response.attending && response.companions > 0 && response.companion_names) {
-                        const companionsList = document.getElementById('companionsList');
-                        if (companionsList) {
-                            // Clear existing companions
-                            companionsList.innerHTML = '';
-                            
-                            // Add each companion
-                            response.companion_names.forEach(name => {
-                                const companionDiv = document.createElement('div');
-                                companionDiv.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
-                                companionDiv.innerHTML = `
-                                    <input type="text" placeholder="Nome do acompanhante" class="companion-input" style="flex: 1;" value="${name}">
-                                    <button type="button" class="btn btn-small btn-danger" onclick="removeCompanion(this)">Remover</button>
-                                `;
-                                companionsList.appendChild(companionDiv);
-                            });
-                            
-                            updateCompanionLimit();
-                        }
-                    }
-                }, 100);
-            }
-        }
-
         // Authentication Functions
         async function handleLogin(e) {
             e.preventDefault();
@@ -1625,7 +1149,6 @@
             const password = document.getElementById('loginPassword').value.trim();
             const rememberLogin = document.getElementById('rememberLogin').checked;
 
-            // Save credentials if requested
             if (rememberLogin) {
                 localStorage.setItem('savedCredentials', JSON.stringify({
                     username: username,
@@ -1635,7 +1158,6 @@
                 localStorage.removeItem('savedCredentials');
             }
 
-            // Check admin credentials
             if (username === 'Invites' && password === '#Invites2025@!!1995') {
                 currentUser = { id: 'admin', username: 'Invites', isAdmin: true };
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -1657,21 +1179,18 @@
                 }
 
                 if (!user.approved) {
-                    currentUser = user;
-                    showPendingView();
-                    startApprovalCheck();
+                    showNotification('Sua conta ainda não foi aprovada pelo administrador.', 'error', 'loginNotification');
                     return;
                 }
 
                 if (!user.active) {
-                    showNotification('Sua conta foi desativada. Entre em contato com o administrador.', 'error', 'loginNotification');
+                    showNotification('Sua conta foi desativada.', 'error', 'loginNotification');
                     return;
                 }
 
                 currentUser = user;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 
-                // Check if user is moderator
                 if (user.is_moderator) {
                     showAdminDashboard();
                 } else {
@@ -1690,7 +1209,6 @@
             const password = document.getElementById('registerPassword').value.trim();
 
             try {
-                // Check if username already exists
                 const { data: existingUser } = await supabase
                     .from('users')
                     .select('username')
@@ -1698,7 +1216,7 @@
                     .single();
 
                 if (existingUser) {
-                    showNotification('Nome de usuário já existe. Escolha outro.', 'error', 'registerNotification');
+                    showNotification('Nome de usuário já existe.', 'error', 'registerNotification');
                     return;
                 }
 
@@ -1715,7 +1233,7 @@
 
                 if (error) throw error;
 
-                showNotification('Conta criada com sucesso! Aguarde a aprovação do administrador para fazer login.', 'success', 'registerNotification');
+                showNotification('Conta criada! Aguarde aprovação do administrador.', 'success', 'registerNotification');
                 setTimeout(() => {
                     document.getElementById('registerForm').reset();
                     showLogin();
@@ -1723,76 +1241,6 @@
             } catch (error) {
                 showNotification('Erro ao criar conta: ' + error.message, 'error', 'registerNotification');
             }
-        }
-
-        function startApprovalCheck() {
-            if (approvalCheckInterval) clearInterval(approvalCheckInterval);
-            
-            approvalCheckInterval = setInterval(async () => {
-                if (!currentUser || currentUser.isAdmin) return;
-
-                try {
-                    const { data: user, error } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('id', currentUser.id)
-                        .single();
-
-                    if (error) return;
-
-                    if (user.approved && user.active) {
-                        clearInterval(approvalCheckInterval);
-                        currentUser = user;
-                        showUserDashboard();
-                        showNotification('Sua conta foi aprovada! Bem-vindo ao InvitesAO!', 'success', 'userNotification');
-                    }
-                } catch (error) {
-                    console.error('Erro ao verificar aprovação:', error);
-                }
-            }, 3000); // Check every 3 seconds
-        }
-
-        async function logout() {
-            if (approvalCheckInterval) clearInterval(approvalCheckInterval);
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            // Don't remove saved credentials on logout
-            if (isEventPage) {
-                location.reload();
-            } else {
-                showGuestView();
-            }
-        }
-
-        function backToEvent() {
-            if (isEventPage && currentEvent) {
-                renderGuestEvent(currentEvent);
-                showGuestView();
-            } else {
-                showGuestView();
-            }
-        }
-
-        // Permission Functions
-        function hasPermission(permission) {
-            if (!currentUser) return false;
-            if (currentUser.isAdmin) return true;
-            
-            // Default permissions for regular users
-            const defaultPermissions = {
-                can_delete_events: true,
-                can_delete_account: false,
-                can_deactivate_account: false,
-                is_moderator: false
-            };
-            
-            // Use user permissions or default
-            const userPermissions = currentUser.permissions || defaultPermissions;
-            return userPermissions[permission] === true;
-        }
-
-        function canModerate() {
-            return currentUser && (currentUser.isAdmin || currentUser.is_moderator);
         }
 
         // User Dashboard Functions
@@ -1819,34 +1267,25 @@
                     const responseCount = event.responses?.length || 0;
                     const confirmedCount = event.responses?.filter(r => r.attending).length || 0;
                     const eventUrl = `${window.location.origin}${window.location.pathname}?event=${event.id}`;
-                    const eventDate = event.event_date ? new Date(event.event_date) : null;
                     const statusText = event.active !== false ? 'Ativo' : 'Inativo';
                     const statusClass = event.active !== false ? 'success' : 'danger';
-                    const versionText = event.site_version === 'noiva' ? '💐 Noiva' : '🤵 Noivos';
-                    
-                    // Check permissions for delete button
-                    const deleteButton = hasPermission('can_delete_events') 
-                        ? `<button class="btn btn-small btn-danger" onclick="deleteEvent('${event.id}')">Excluir</button>`
-                        : '';
                     
                     return `
                         <div class="event-card">
                             <h3>${event.name} <span class="btn btn-small btn-${statusClass}" style="font-size: 10px; padding: 2px 8px;">${statusText}</span></h3>
-                            <p><strong>Data:</strong> ${event.event_date ? formatEventDate(new Date(event.event_date), event.time_enabled) : 'Data não definida'}</p>
-                            <p><strong>Versão:</strong> ${versionText}</p>
+                            <p><strong>Data:</strong> ${formatDate(new Date(event.event_date))}</p>
                             <p><strong>Confirmações:</strong> ${confirmedCount}/${event.event_limit === 0 ? '∞' : event.event_limit}</p>
                             <p><strong>Total de respostas:</strong> ${responseCount}</p>
                             <div style="margin: 10px 0;">
-                                <p><strong>Link dos Convidados:</strong></p>
-                                <small><a href="${eventUrl}" target="_blank" style="word-break: break-all; font-size: 11px;">${eventUrl}</a></small>
+                                <p><strong>Link:</strong></p>
+                                <small><a href="${eventUrl}" target="_blank" style="word-break: break-all;">${eventUrl}</a></small>
                             </div>
-                            <div style="margin-top: 15px;">
+                            <div style="margin-top: 15px; display: flex; gap: 5px; flex-wrap: wrap;">
                                 <button class="btn btn-small btn-secondary" onclick="editEvent('${event.id}')">Editar</button>
-                                <button class="btn btn-small btn-primary" onclick="viewResponses('${event.id}')">Ver Respostas</button>
-                                <button class="btn btn-small btn-success" onclick="downloadReport('${event.id}')">Baixar PDF</button>
-                                <button class="btn btn-small btn-secondary" onclick="manageGuests('${event.id}')">Gerenciar Convidados</button>
+                                <button class="btn btn-small btn-primary" onclick="viewResponses('${event.id}')">Respostas</button>
+                                <button class="btn btn-small btn-success" onclick="downloadReport('${event.id}')">PDF</button>
                                 <button class="btn btn-small ${event.active !== false ? 'btn-danger' : 'btn-success'}" onclick="toggleEventStatus('${event.id}', ${event.active === false})">${event.active !== false ? 'Desativar' : 'Ativar'}</button>
-                                ${deleteButton}
+                                <button class="btn btn-small btn-danger" onclick="deleteEventWithPassword('${event.id}')">Excluir</button>
                             </div>
                         </div>
                     `;
@@ -1862,65 +1301,25 @@
             e.preventDefault();
             
             const eventDate = document.getElementById('eventDate').value;
-            const eventTime = document.getElementById('eventTimeEnabled').checked ? document.getElementById('eventTime').value : null;
             const deadlineDate = document.getElementById('eventDeadline').value;
-            const deadlineTime = document.getElementById('deadlineTimeEnabled').checked ? document.getElementById('deadlineTime').value : null;
 
-            if (!eventDate) {
-                showNotification('A data do evento é obrigatória!', 'error', 'eventNotification');
+            if (!eventDate || !deadlineDate) {
+                showNotification('Datas são obrigatórias!', 'error', 'eventNotification');
                 return;
             }
-
-            if (!deadlineDate) {
-                showNotification('A data limite para confirmação é obrigatória!', 'error', 'eventNotification');
-                return;
-            }
-
-            // Fix timezone issue by creating dates in local timezone
-            const eventDateTime = eventTime ? `${eventDate}T${eventTime}:00` : `${eventDate}T23:59:00`;
-            const deadlineDateTime = deadlineTime ? `${deadlineDate}T${deadlineTime}:00` : `${deadlineDate}T23:59:00`;
 
             const eventData = {
                 name: document.getElementById('eventName').value,
-                event_date: eventDateTime,
-                deadline: deadlineDateTime,
-                time_enabled: document.getElementById('eventTimeEnabled').checked,
-                deadline_time_enabled: document.getElementById('deadlineTimeEnabled').checked,
+                event_date: `${eventDate}T23:59:00`,
+                deadline: `${deadlineDate}T23:59:00`,
                 event_limit: parseInt(document.getElementById('eventLimit').value),
                 max_companions: parseInt(document.getElementById('maxCompanions').value),
                 description: document.getElementById('eventDescription').value,
-                cover_enabled: document.getElementById('eventCoverEnabled').checked,
-                cover_position_x: coverPosition.x,
-                cover_position_y: coverPosition.y,
                 site_version: document.getElementById('siteVersion').value,
                 user_id: currentUser.id
             };
 
             try {
-                let coverUrl = null;
-                const coverFile = document.getElementById('eventCover').files[0];
-                
-                if (eventData.cover_enabled && coverFile) {
-                    const fileExt = coverFile.name.split('.').pop();
-                    const fileName = `${Date.now()}.${fileExt}`;
-                    
-                    const { data: uploadData, error: uploadError } = await supabase.storage
-                        .from('event-covers')
-                        .upload(fileName, coverFile);
-
-                    if (uploadError) throw uploadError;
-
-                    const { data: urlData } = supabase.storage
-                        .from('event-covers')
-                        .getPublicUrl(fileName);
-                    
-                    coverUrl = urlData.publicUrl;
-                }
-
-                if (coverUrl) {
-                    eventData.cover_url = coverUrl;
-                }
-
                 if (editingEventId) {
                     const { error } = await supabase
                         .from('events')
@@ -1928,31 +1327,14 @@
                         .eq('id', editingEventId);
                     
                     if (error) throw error;
-                    showNotification('Evento atualizado com sucesso!', 'success', 'eventNotification');
+                    showNotification('Evento atualizado!', 'success', 'eventNotification');
                 } else {
                     const { error } = await supabase
                         .from('events')
                         .insert([eventData]);
                     
                     if (error) throw error;
-                    const { data: newEvent } = await supabase
-                        .from('events')
-                        .select('id')
-                        .eq('user_id', currentUser.id)
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .single();
-                    
-                    if (newEvent) {
-                        const baseUrl = `${window.location.origin}${window.location.pathname}`;
-                        const eventLink = `${baseUrl}?event=${newEvent.id}`;
-                        
-                        showNotification(`Evento criado com sucesso!<br><br>
-                            <strong>Link gerado:</strong><br>
-                            <small><a href="${eventLink}" target="_blank" style="word-break: break-all;">${eventLink}</a></small>`, 'success', 'eventNotification');
-                    } else {
-                        showNotification('Evento criado com sucesso!', 'success', 'eventNotification');
-                    }
+                    showNotification('Evento criado!', 'success', 'eventNotification');
                 }
 
                 setTimeout(() => {
@@ -1980,33 +1362,15 @@
                 
                 const eventDate = new Date(event.event_date);
                 document.getElementById('eventDate').value = eventDate.toISOString().split('T')[0];
-                document.getElementById('eventTimeEnabled').checked = event.time_enabled;
-                if (event.time_enabled) {
-                    document.getElementById('eventTime').value = eventDate.toTimeString().slice(0, 5);
-                }
 
                 const deadlineDate = new Date(event.deadline);
                 document.getElementById('eventDeadline').value = deadlineDate.toISOString().split('T')[0];
-                document.getElementById('deadlineTimeEnabled').checked = event.deadline_time_enabled;
-                if (event.deadline_time_enabled) {
-                    document.getElementById('deadlineTime').value = deadlineDate.toTimeString().slice(0, 5);
-                }
 
                 document.getElementById('eventLimit').value = event.event_limit;
                 document.getElementById('maxCompanions').value = event.max_companions || 5;
                 document.getElementById('eventDescription').value = event.description || '';
-                document.getElementById('eventCoverEnabled').checked = event.cover_enabled;
                 document.getElementById('siteVersion').value = event.site_version || 'noivos';
                 
-                // Set cover position
-                if (event.cover_position_x !== undefined && event.cover_position_y !== undefined) {
-                    coverPosition.x = event.cover_position_x;
-                    coverPosition.y = event.cover_position_y;
-                }
-                
-                toggleCoverUpload();
-                toggleEventTime();
-                toggleDeadlineTime();
                 showCreateEvent();
             } catch (error) {
                 showNotification('Erro ao carregar evento: ' + error.message, 'error', 'userNotification');
@@ -2022,21 +1386,21 @@
 
                 if (error) throw error;
 
-                showNotification(`Evento ${activate ? 'ativado' : 'desativado'} com sucesso!`, 'success', 'userNotification');
+                showNotification(`Evento ${activate ? 'ativado' : 'desativado'}!`, 'success', 'userNotification');
                 await loadUserEvents();
             } catch (error) {
-                showNotification('Erro ao alterar status do evento: ' + error.message, 'error', 'userNotification');
+                showNotification('Erro ao alterar status: ' + error.message, 'error', 'userNotification');
             }
         }
 
+        function deleteEventWithPassword(eventId) {
+            showPasswordModal(
+                'Para excluir este evento, digite sua senha:',
+                async () => await deleteEvent(eventId)
+            );
+        }
+
         async function deleteEvent(eventId) {
-            if (!hasPermission('can_delete_events')) {
-                showNotification('Você não tem permissão para excluir eventos.', 'error', 'userNotification');
-                return;
-            }
-
-            if (!confirm('Tem certeza que deseja excluir este evento?')) return;
-
             try {
                 const { error } = await supabase
                     .from('events')
@@ -2045,138 +1409,10 @@
 
                 if (error) throw error;
 
-                showNotification('Evento excluído com sucesso!', 'success', 'userNotification');
+                showNotification('Evento excluído!', 'success', 'userNotification');
                 await loadUserEvents();
             } catch (error) {
-                showNotification('Erro ao excluir evento: ' + error.message, 'error', 'userNotification');
-            }
-        }
-
-        async function manageGuests(eventId) {
-            try {
-                const { data: event, error: eventError } = await supabase
-                    .from('events')
-                    .select('*')
-                    .eq('id', eventId)
-                    .single();
-
-                if (eventError) throw eventError;
-
-                const { data: responses, error } = await supabase
-                    .from('responses')
-                    .select('*')
-                    .eq('event_id', eventId)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                const attending = responses.filter(r => r.attending);
-
-                let html = `
-                    <div class="card">
-                        <h3>👥 ${event.name} - Gerenciar Convidados</h3>
-                        <p><strong>Confirmados:</strong> ${attending.length} pessoas</p>
-                        
-                        <h4 style="margin-top: 20px; color: #28a745;">✅ Convidados Confirmados</h4>
-                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
-                            ${attending.map(r => `
-                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong>${r.guest_name}</strong>
-                                        <span style="margin-left: 10px; padding: 2px 6px; border-radius: 10px; font-size: 10px; background: ${r.guest_type === 'noivo' ? '#667eea' : '#ff9a9e'}; color: white;">
-                                            ${r.guest_type === 'noivo' ? '🤵 NOIVO' : '👰 NOIVA'}
-                                        </span>
-                                        ${r.companions > 0 ? `<br><small style="color: #666;">+ ${r.companions} acompanhante(s)</small>` : ''}
-                                        <br><small style="color: #666;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
-                                    </div>
-                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'manageGuests')" title="Eliminar resposta">🗑️ Eliminar</button>
-                                </div>
-                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma confirmação ainda.</p>'}
-                        </div>
-                        
-                        <h4 style="margin-top: 20px; color: #dc3545;">❌ Não Comparecerão</h4>
-                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
-                            ${responses.filter(r => !r.attending).map(r => `
-                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong>${r.guest_name}</strong>
-                                        <span style="margin-left: 10px; padding: 2px 6px; border-radius: 10px; font-size: 10px; background: ${r.guest_type === 'noivo' ? '#667eea' : '#ff9a9e'}; color: white;">
-                                            ${r.guest_type === 'noivo' ? '🤵 NOIVO' : '👰 NOIVA'}
-                                        </span>
-                                        <br><small style="color: #666;">Respondido em: ${formatDate(new Date(r.created_at))}</small>
-                                    </div>
-                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'manageGuests')" title="Eliminar resposta">🗑️ Eliminar</button>
-                                </div>
-                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma resposta negativa ainda.</p>'}
-                        </div>
-                        
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-secondary btn-small" onclick="showUserDashboard()">Voltar</button>
-                        </div>
-                    </div>
-                `;
-
-                document.getElementById('userEvents').innerHTML = html;
-            } catch (error) {
-                showNotification('Erro ao carregar convidados: ' + error.message, 'error', 'userNotification');
-            }
-        }
-
-        async function removeGuest(eventId, guestName) {
-            if (!confirm(`Tem certeza que deseja remover ${guestName} da lista de convidados?`)) return;
-
-            try {
-                const { error } = await supabase
-                    .from('responses')
-                    .delete()
-                    .eq('event_id', eventId)
-                    .eq('guest_name', guestName);
-
-                if (error) throw error;
-
-                // Remove from localStorage as well
-                const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
-                if (responses[eventId] && responses[eventId].guest_name === guestName) {
-                    delete responses[eventId];
-                    localStorage.setItem('eventResponses', JSON.stringify(responses));
-                }
-
-                showNotification('Convidado removido com sucesso!', 'success', 'userNotification');
-                await manageGuests(eventId);
-            } catch (error) {
-                showNotification('Erro ao remover convidado: ' + error.message, 'error', 'userNotification');
-            }
-        }
-
-        async function deleteResponse(eventId, guestName, returnView = 'viewResponses') {
-            if (!confirm(`Tem certeza que deseja eliminar a resposta de ${guestName}?\n\nEsta ação não pode ser desfeita e a resposta será removida permanentemente do sistema.`)) return;
-
-            try {
-                const { error } = await supabase
-                    .from('responses')
-                    .delete()
-                    .eq('event_id', eventId)
-                    .eq('guest_name', guestName);
-
-                if (error) throw error;
-
-                // Remove from localStorage as well
-                const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
-                if (responses[eventId] && responses[eventId].guest_name === guestName) {
-                    delete responses[eventId];
-                    localStorage.setItem('eventResponses', JSON.stringify(responses));
-                }
-
-                showNotification(`Resposta de ${guestName} eliminada com sucesso!`, 'success', 'userNotification');
-                
-                // Return to the appropriate view
-                if (returnView === 'viewResponses') {
-                    await viewResponses(eventId);
-                } else if (returnView === 'manageGuests') {
-                    await manageGuests(eventId);
-                }
-            } catch (error) {
-                showNotification('Erro ao eliminar resposta: ' + error.message, 'error', 'userNotification');
+                showNotification('Erro ao excluir: ' + error.message, 'error', 'userNotification');
             }
         }
 
@@ -2200,61 +1436,44 @@
 
                 const attending = responses.filter(r => r.attending);
                 const notAttending = responses.filter(r => !r.attending);
-                const attendingNoivo = attending.filter(r => r.guest_type === 'noivo');
-                const attendingNoiva = attending.filter(r => r.guest_type === 'noiva');
                 const totalCompanions = attending.reduce((sum, r) => sum + (r.companions || 0), 0);
-                const companionsNoivo = attendingNoivo.reduce((sum, r) => sum + (r.companions || 0), 0);
-                const companionsNoiva = attendingNoiva.reduce((sum, r) => sum + (r.companions || 0), 0);
 
                 let html = `
                     <div class="card">
                         <h3>📊 ${event.name} - Respostas</h3>
-                        <p><strong>Confirmados:</strong> ${attending.length} pessoas + ${totalCompanions} acompanhantes = ${attending.length + totalCompanions} total</p>
+                        <p><strong>Confirmados:</strong> ${attending.length} + ${totalCompanions} acompanhantes = ${attending.length + totalCompanions} total</p>
                         <p><strong>Não comparecerão:</strong> ${notAttending.length}</p>
-                        <p><strong>Total de respostas:</strong> ${responses.length}</p>
-                        <p><strong>Limite do evento:</strong> ${event.event_limit === 0 ? 'Sem limite' : event.event_limit}</p>
                         
-                        <h4 style="margin-top: 20px; color: #667eea;">🤵 Convidados do Noivo (${attendingNoivo.length} + ${companionsNoivo} acompanhantes)</h4>
-                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
-                            ${attendingNoivo.map(r => `
+                        <h4 style="margin-top: 20px; color: #28a745;">✅ Confirmados</h4>
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
+                            ${attending.map(r => `
                                 <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
                                     <div>
                                         <strong>${r.guest_name}</strong>
-                                        ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
-                                        ${r.companion_names && r.companion_names.length > 0 ? `<br><small style="color: #666;">Acompanhantes: ${r.companion_names.join(', ')}</small>` : ''}
-                                        <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
+                                        <span style="margin-left: 10px; padding: 2px 6px; border-radius: 10px; font-size: 10px; background: ${r.guest_type === 'noivo' ? '#667eea' : '#ff9a9e'}; color: white;">
+                                            ${r.guest_type === 'noivo' ? '🤵' : '👰'}
+                                        </span>
+                                        ${r.companions > 0 ? `<br><small>+ ${r.companions} acompanhante(s)</small>` : ''}
+                                        ${r.companion_names && r.companion_names.length > 0 ? `<br><small>Nomes: ${r.companion_names.join(', ')}</small>` : ''}
                                     </div>
-                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'viewResponses')" title="Eliminar resposta">🗑️</button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteResponseWithPassword('${eventId}', '${r.guest_name}')">🗑️</button>
                                 </div>
-                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhum convidado do noivo confirmado.</p>'}
+                            `).join('') || '<p style="padding: 20px; text-align: center;">Nenhuma confirmação.</p>'}
                         </div>
                         
-                        <h4 style="margin-top: 20px; color: #ff9a9e;">👰 Convidados da Noiva (${attendingNoiva.length} + ${companionsNoiva} acompanhantes)</h4>
-                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
-                            ${attendingNoiva.map(r => `
-                                <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong>${r.guest_name}</strong>
-                                        ${r.companions > 0 ? ` + ${r.companions} acompanhante(s)` : ''}
-                                        ${r.companion_names && r.companion_names.length > 0 ? `<br><small style="color: #666;">Acompanhantes: ${r.companion_names.join(', ')}</small>` : ''}
-                                        <small style="color: #666; display: block;">Confirmado em: ${formatDate(new Date(r.created_at))}</small>
-                                    </div>
-                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'viewResponses')" title="Eliminar resposta">🗑️</button>
-                                </div>
-                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhum convidado da noiva confirmado.</p>'}
-                        </div>
-                        
-                        <h4 style="margin-top: 20px; color: #dc3545;">❌ Não comparecerão (${notAttending.length})</h4>
+                        <h4 style="margin-top: 20px; color: #dc3545;">❌ Não Comparecerão</h4>
                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
                             ${notAttending.map(r => `
                                 <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
                                     <div>
                                         <strong>${r.guest_name}</strong>
-                                        <small style="color: #666; display: block;">Respondido em: ${formatDate(new Date(r.created_at))}</small>
+                                        <span style="margin-left: 10px; padding: 2px 6px; border-radius: 10px; font-size: 10px; background: ${r.guest_type === 'noivo' ? '#667eea' : '#ff9a9e'}; color: white;">
+                                            ${r.guest_type === 'noivo' ? '🤵' : '👰'}
+                                        </span>
                                     </div>
-                                    <button class="btn btn-small btn-danger" onclick="deleteResponse('${eventId}', '${r.guest_name}', 'viewResponses')" title="Eliminar resposta">🗑️</button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteResponseWithPassword('${eventId}', '${r.guest_name}')">🗑️</button>
                                 </div>
-                            `).join('') || '<p style="padding: 20px; text-align: center; color: #666;">Nenhuma resposta negativa.</p>'}
+                            `).join('') || '<p style="padding: 20px; text-align: center;">Nenhuma resposta negativa.</p>'}
                         </div>
                         
                         <div style="margin-top: 20px;">
@@ -2267,6 +1486,36 @@
                 document.getElementById('userEvents').innerHTML = html;
             } catch (error) {
                 showNotification('Erro ao carregar respostas: ' + error.message, 'error', 'userNotification');
+            }
+        }
+
+        function deleteResponseWithPassword(eventId, guestName) {
+            showPasswordModal(
+                `Para eliminar a resposta de ${guestName}, digite sua senha:`,
+                async () => await deleteResponse(eventId, guestName)
+            );
+        }
+
+        async function deleteResponse(eventId, guestName) {
+            try {
+                const { error } = await supabase
+                    .from('responses')
+                    .delete()
+                    .eq('event_id', eventId)
+                    .eq('guest_name', guestName);
+
+                if (error) throw error;
+
+                const responses = JSON.parse(localStorage.getItem('eventResponses') || '{}');
+                if (responses[eventId] && responses[eventId].guest_name === guestName) {
+                    delete responses[eventId];
+                    localStorage.setItem('eventResponses', JSON.stringify(responses));
+                }
+
+                showNotification(`Resposta eliminada!`, 'success', 'userNotification');
+                await viewResponses(eventId);
+            } catch (error) {
+                showNotification('Erro ao eliminar: ' + error.message, 'error', 'userNotification');
             }
         }
 
@@ -2290,230 +1539,66 @@
 
                 const attending = responses.filter(r => r.attending);
                 const notAttending = responses.filter(r => !r.attending);
-                const attendingNoivo = attending.filter(r => r.guest_type === 'noivo');
-                const attendingNoiva = attending.filter(r => r.guest_type === 'noiva');
                 const totalCompanions = attending.reduce((sum, r) => sum + (r.companions || 0), 0);
-                const companionsNoivo = attendingNoivo.reduce((sum, r) => sum + (r.companions || 0), 0);
-                const companionsNoiva = attendingNoiva.reduce((sum, r) => sum + (r.companions || 0), 0);
 
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                // Function to clean text for PDF
-                function cleanText(text) {
-                    if (!text) return '';
-                    return text.toString()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-                        .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
-                        .replace(/[^\w\s\-.,!?()]/g, '') // Keep only safe characters
-                        .trim();
-                }
-
-                // Colors
-                const primaryColor = [102, 126, 234]; // #667eea
-                const secondaryColor = [118, 75, 162]; // #764ba2
-                const successColor = [40, 167, 69]; // #28a745
-                const dangerColor = [220, 53, 69]; // #dc3545
-                const grayColor = [108, 117, 125]; // #6c757d
-
-                // Header with gradient effect
-                doc.setFillColor(...primaryColor);
-                doc.rect(0, 0, 210, 40, 'F');
-                
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(24);
+                // Header
+                doc.setFontSize(20);
                 doc.setFont('helvetica', 'bold');
-                doc.text('RELATORIO DO EVENTO', 20, 25);
+                doc.text('RELATORIO DO EVENTO', 20, 30);
 
-                // Event title
-                doc.setTextColor(0, 0, 0);
-                doc.setFontSize(18);
-                doc.setFont('helvetica', 'bold');
-                doc.text(cleanText(event.name), 20, 55);
-
-                // Event details box
-                doc.setFillColor(248, 249, 250);
-                doc.rect(15, 65, 180, 35, 'F');
-                doc.setDrawColor(...grayColor);
-                doc.rect(15, 65, 180, 35, 'S');
-
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...grayColor);
-                doc.text('Data do Evento:', 20, 75);
-                doc.text('Limite de Participantes:', 20, 85);
-                doc.text('Relatorio gerado em:', 20, 95);
-
-                doc.setTextColor(0, 0, 0);
-                doc.setFont('helvetica', 'bold');
-                doc.text(formatEventDate(new Date(event.event_date), event.time_enabled), 70, 75);
-                doc.text(`${event.event_limit} pessoas`, 85, 85);
-                doc.text(formatDate(new Date()), 75, 95);
-
-                // Statistics section
-                let yPos = 120;
+                // Event details
                 doc.setFontSize(16);
+                doc.text(event.name, 20, 50);
+
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Data do Evento: ${formatDate(new Date(event.event_date))}`, 20, 70);
+                doc.text(`Confirmados: ${attending.length} pessoas + ${totalCompanions} acompanhantes = ${attending.length + totalCompanions} total`, 20, 85);
+                doc.text(`Nao comparecerao: ${notAttending.length} pessoas`, 20, 100);
+
+                // Confirmed attendees
+                let yPos = 120;
+                doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...primaryColor);
-                doc.text('ESTATISTICAS', 20, yPos);
+                doc.text('CONFIRMADOS:', 20, yPos);
 
                 yPos += 15;
-                
-                // Stats boxes
-                const stats = [
-                    { label: 'Confirmados', value: `${attending.length} pessoas`, color: successColor },
-                    { label: 'Acompanhantes', value: `${totalCompanions} pessoas`, color: primaryColor },
-                    { label: 'Total Presentes', value: `${attending.length + totalCompanions} pessoas`, color: secondaryColor },
-                    { label: 'Nao Comparecerao', value: `${notAttending.length} pessoas`, color: dangerColor }
-                ];
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
 
-                stats.forEach((stat, index) => {
-                    const x = 20 + (index % 2) * 90;
-                    const y = yPos + Math.floor(index / 2) * 25;
-                    
-                    doc.setFillColor(...stat.color);
-                    doc.rect(x, y, 80, 20, 'F');
-                    
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(stat.label, x + 3, y + 8);
-                    doc.setFontSize(11);
-                    doc.text(stat.value, x + 3, y + 16);
+                attending.forEach((response, index) => {
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 30;
+                    }
+
+                    doc.text(`${index + 1}. ${response.guest_name}`, 20, yPos);
+                    if (response.companions > 0) {
+                        doc.text(`+ ${response.companions} acompanhante(s)`, 120, yPos);
+                        if (response.companion_names && response.companion_names.length > 0) {
+                            yPos += 10;
+                            doc.text(`   Nomes: ${response.companion_names.join(', ')}`, 25, yPos);
+                        }
+                    }
+                    yPos += 15;
                 });
 
-                yPos += 65;
-
-                // Confirmed attendees section - Noivo
-                if (attendingNoivo.length > 0) {
-                    doc.setFillColor(...primaryColor);
-                    doc.rect(15, yPos - 5, 180, 15, 'F');
-                    
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(14);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`CONVIDADOS DO NOIVO (${attendingNoivo.length} + ${companionsNoivo} acompanhantes)`, 20, yPos + 5);
-
-                    yPos += 20;
-
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFontSize(10);
-                    doc.setFont('helvetica', 'normal');
-
-                    attendingNoivo.forEach((response, index) => {
-                        if (yPos > 270) {
-                            doc.addPage();
-                            yPos = 30;
-                        }
-
-                        // Alternating row colors
-                        if (index % 2 === 0) {
-                            doc.setFillColor(248, 249, 250);
-                            doc.rect(15, yPos - 3, 180, 12, 'F');
-                        }
-
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(`${index + 1}.`, 20, yPos + 5);
-                        doc.text(cleanText(response.guest_name), 30, yPos + 5);
-
-                        if (response.companions > 0) {
-                            doc.setFont('helvetica', 'normal');
-                            doc.setTextColor(...primaryColor);
-                            doc.text(`+ ${response.companions} acompanhante${response.companions > 1 ? 's' : ''}`, 120, yPos + 5);
-                            
-                            if (response.companion_names && response.companion_names.length > 0) {
-                                doc.setFontSize(8);
-                                doc.setTextColor(...grayColor);
-                                const cleanNames = response.companion_names.map(name => cleanText(name)).join(', ');
-                                doc.text(`(${cleanNames})`, 30, yPos + 10);
-                                yPos += 5;
-                            }
-                        }
-
-                        doc.setTextColor(0, 0, 0);
-                        doc.setFontSize(10);
-                        yPos += 15;
-                    });
-                }
-
-                // Confirmed attendees section - Noiva
-                if (attendingNoiva.length > 0) {
-                    yPos += 10;
-                    if (yPos > 250) {
-                        doc.addPage();
-                        yPos = 30;
-                    }
-
-                    doc.setFillColor(255, 154, 158); // Pink color for noiva
-                    doc.rect(15, yPos - 5, 180, 15, 'F');
-                    
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(14);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`CONVIDADOS DA NOIVA (${attendingNoiva.length} + ${companionsNoiva} acompanhantes)`, 20, yPos + 5);
-
-                    yPos += 20;
-
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFontSize(10);
-                    doc.setFont('helvetica', 'normal');
-
-                    attendingNoiva.forEach((response, index) => {
-                        if (yPos > 270) {
-                            doc.addPage();
-                            yPos = 30;
-                        }
-
-                        // Alternating row colors
-                        if (index % 2 === 0) {
-                            doc.setFillColor(248, 249, 250);
-                            doc.rect(15, yPos - 3, 180, 12, 'F');
-                        }
-
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(`${index + 1}.`, 20, yPos + 5);
-                        doc.text(cleanText(response.guest_name), 30, yPos + 5);
-
-                        if (response.companions > 0) {
-                            doc.setFont('helvetica', 'normal');
-                            doc.setTextColor(...primaryColor);
-                            doc.text(`+ ${response.companions} acompanhante${response.companions > 1 ? 's' : ''}`, 120, yPos + 5);
-                            
-                            if (response.companion_names && response.companion_names.length > 0) {
-                                doc.setFontSize(8);
-                                doc.setTextColor(...grayColor);
-                                const cleanNames = response.companion_names.map(name => cleanText(name)).join(', ');
-                                doc.text(`(${cleanNames})`, 30, yPos + 10);
-                                yPos += 5;
-                            }
-                        }
-
-                        doc.setTextColor(0, 0, 0);
-                        doc.setFontSize(10);
-                        yPos += 15;
-                    });
-                }
-
-                // Not attending section
+                // Not attending
                 if (notAttending.length > 0) {
-                    yPos += 10;
+                    yPos += 20;
                     if (yPos > 250) {
                         doc.addPage();
                         yPos = 30;
                     }
 
-                    doc.setFillColor(...dangerColor);
-                    doc.rect(15, yPos - 5, 180, 15, 'F');
-                    
-                    doc.setTextColor(255, 255, 255);
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(`NAO COMPARECERAO (${notAttending.length})`, 20, yPos + 5);
+                    doc.text('NAO COMPARECERAO:', 20, yPos);
 
-                    yPos += 20;
-
-                    doc.setTextColor(0, 0, 0);
+                    yPos += 15;
                     doc.setFontSize(10);
                     doc.setFont('helvetica', 'normal');
 
@@ -2522,174 +1607,103 @@
                             doc.addPage();
                             yPos = 30;
                         }
-
-                        if (index % 2 === 0) {
-                            doc.setFillColor(248, 249, 250);
-                            doc.rect(15, yPos - 3, 180, 10, 'F');
-                        }
-
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(`${index + 1}.`, 20, yPos + 5);
-                        doc.text(cleanText(response.guest_name), 30, yPos + 5);
-
-                        yPos += 12;
+                        doc.text(`${index + 1}. ${response.guest_name}`, 20, yPos);
+                        yPos += 15;
                     });
                 }
 
-                // Footer
-                const pageCount = doc.internal.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.setFillColor(...grayColor);
-                    doc.rect(0, 287, 210, 10, 'F');
-                    
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text('Gerado por InvitesAO - Sistema de Confirmacao de Presenca', 20, 293);
-                    doc.text(`Pagina ${i} de ${pageCount}`, 170, 293);
-                }
-
-                const cleanFileName = cleanText(event.name).replace(/\s+/g, '-').toLowerCase() || 'evento';
-                doc.save(`relatorio-${cleanFileName}.pdf`);
+                doc.save(`${event.name}_relatorio.pdf`);
             } catch (error) {
-                showNotification('Erro ao gerar relatório: ' + error.message, 'error', 'userNotification');
+                showNotification('Erro ao gerar PDF: ' + error.message, 'error', 'userNotification');
             }
         }
 
-        // Admin Functions
+        // Admin Dashboard Functions
         async function showAdminDashboard() {
             hideAllViews();
             document.getElementById('adminDashboard').classList.remove('hidden');
-            
-            // Hide admin-only section for moderators
-            const adminOnlySection = document.getElementById('adminOnlySection');
-            if (currentUser && !currentUser.isAdmin && currentUser.is_moderator) {
-                adminOnlySection.style.display = 'none';
-            } else {
-                adminOnlySection.style.display = 'block';
-            }
-            
             await loadAdminData();
         }
 
         async function loadAdminData() {
             try {
-                // Load stats
                 const { data: users } = await supabase.from('users').select('*');
                 const { data: events } = await supabase.from('events').select('*');
                 const { data: responses } = await supabase.from('responses').select('*');
 
+                const pendingUsers = users?.filter(u => !u.approved) || [];
+                const approvedUsers = users?.filter(u => u.approved) || [];
+
                 document.getElementById('totalUsers').textContent = users?.length || 0;
-                document.getElementById('pendingUsers').textContent = users?.filter(u => !u.approved).length || 0;
+                document.getElementById('pendingUsers').textContent = pendingUsers.length;
                 document.getElementById('totalEvents').textContent = events?.length || 0;
                 document.getElementById('totalResponses').textContent = responses?.length || 0;
 
-                // Load pending requests
-                const pendingUsers = users?.filter(u => !u.approved) || [];
+                // Pending requests
                 const pendingHtml = pendingUsers.map(user => `
-                    <div style="padding: 20px; border: 2px solid #ffc107; border-radius: 12px; margin-bottom: 15px; background: #fff8e1;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <div>
-                                <strong style="font-size: 1.1em; color: #333;">${user.name}</strong><br>
-                                <small style="color: #666;">👤 @${user.username}</small><br>
-                                <small style="color: #666;">📱 ${user.phone}</small>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="btn btn-small btn-success" onclick="approveUser('${user.id}')">✅ Aprovar</button>
-                                <button class="btn btn-small btn-danger" onclick="rejectUser('${user.id}')">❌ Rejeitar</button>
-                            </div>
+                    <div style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            <small>@${user.username} • ${user.phone}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-small btn-success" onclick="approveUser('${user.id}')">Aprovar</button>
+                            <button class="btn btn-small btn-danger" onclick="rejectUser('${user.id}')">Rejeitar</button>
                         </div>
                     </div>
                 `).join('');
-                document.getElementById('pendingRequests').innerHTML = pendingHtml || '<div style="text-align: center; padding: 30px; color: #666; background: #f8f9fa; border-radius: 10px;"><p style="margin: 0; font-size: 1.1em;">✅ Nenhuma solicitação pendente</p><small>Todas as contas foram processadas</small></div>';
 
-                // Load user management
-                const approvedUsers = users?.filter(u => u.approved) || [];
-                const usersHtml = approvedUsers.map(user => {
-                    const isModerator = user.is_moderator;
-                    const canDeleteEvents = user.can_delete_events !== false;
-                    
-                    return `
-                        <div style="padding: 20px; border: 2px solid ${user.active ? '#28a745' : '#dc3545'}; border-radius: 12px; margin-bottom: 15px; background: ${user.active ? '#f8fff8' : '#fff5f5'};">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
-                                <div>
-                                    <strong style="font-size: 1.1em; color: #333;">${user.name}</strong>
-                                    <span style="margin-left: 10px; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: ${user.active ? '#28a745' : '#dc3545'}; color: white;">${user.active ? '🟢 ATIVO' : '🔴 INATIVO'}</span>
-                                    ${isModerator ? '<span style="margin-left: 5px; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #667eea; color: white;">👑 MODERADOR</span>' : ''}
-                                    <br>
-                                    <small style="color: #666;">👤 @${user.username}</small><br>
-                                    <small style="color: #666;">📱 ${user.phone}</small><br>
-                                    <small style="color: #666;">🗑️ Pode excluir eventos: ${canDeleteEvents ? 'Sim' : 'Não'}</small>
-                                </div>
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                    <button class="btn btn-small btn-secondary" onclick="loginAsUser('${user.id}')">🔑 Entrar como usuário</button>
-                                    <button class="btn btn-small ${user.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserStatus('${user.id}', ${!user.active})">
-                                        ${user.active ? '🚫 Desativar' : '✅ Ativar'}
-                                    </button>
-                                    <button class="btn btn-small btn-secondary" onclick="manageUserPermissions('${user.id}')">⚙️ Permissões</button>
-                                    <button class="btn btn-small btn-secondary" onclick="viewUserPassword('${user.id}')">👁️ Ver Senha</button>
-                                    <button class="btn btn-small btn-secondary" onclick="changeUserPassword('${user.id}')">🔐 Alterar Senha</button>
-                                    <button class="btn btn-small btn-danger" onclick="deleteUser('${user.id}')">🗑️ Eliminar</button>
-                                </div>
-                            </div>
+                document.getElementById('pendingRequests').innerHTML = pendingHtml || '<p>Nenhuma solicitação pendente.</p>';
+
+                // User management
+                const usersHtml = approvedUsers.map(user => `
+                    <div style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            <small>@${user.username} • ${user.phone}</small>
+                            ${user.is_moderator ? '<span style="background: #667eea; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px;">MODERADOR</span>' : ''}
                         </div>
-                    `;
-                }).join('');
+                        <div>
+                            <button class="btn btn-small ${user.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserStatus('${user.id}', ${!user.active})">${user.active ? 'Desativar' : 'Ativar'}</button>
+                            ${!user.is_moderator ? `<button class="btn btn-small btn-primary" onclick="toggleModerator('${user.id}', true)">Tornar Moderador</button>` : `<button class="btn btn-small btn-secondary" onclick="toggleModerator('${user.id}', false)">Remover Moderador</button>`}
+                        </div>
+                    </div>
+                `).join('');
+
                 document.getElementById('userManagement').innerHTML = usersHtml || '<p>Nenhum usuário aprovado.</p>';
 
-                // Load all events
-                const eventsHtml = events?.map(event => {
-                    const eventUser = users?.find(u => u.id === event.user_id);
-                    return `
-                        <div style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
-                            <strong>${event.name}</strong><br>
-                            <small>Data: ${event.event_date ? formatEventDate(new Date(event.event_date), event.time_enabled) : 'Data não definida'}</small><br>
-                            <small>Status: ${event.active !== false ? 'Ativo' : 'Inativo'}</small><br>
-                            <small>Criado por: ${eventUser?.name || 'Usuário não encontrado'} (@${eventUser?.username || 'N/A'})</small><br>
-                            <button class="btn btn-small btn-primary" onclick="viewEventResponsesAdmin('${event.id}')">Ver Respostas</button>
-                            <button class="btn btn-small btn-success" onclick="downloadEventReport('${event.id}')">Baixar PDF</button>
-                            <button class="btn btn-small ${event.active !== false ? 'btn-danger' : 'btn-success'}" onclick="toggleEventStatusAdmin('${event.id}', ${event.active === false})">${event.active !== false ? 'Desativar' : 'Ativar'}</button>
-                            <button class="btn btn-small btn-danger" onclick="deleteEventAdmin('${event.id}')">Excluir</button>
-                        </div>
-                    `;
-                }).join('') || '<p>Nenhum evento criado.</p>';
-                document.getElementById('allEvents').innerHTML = eventsHtml;
+                // All events
+                const eventsHtml = events?.map(event => `
+                    <div style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                        <strong>${event.name}</strong><br>
+                        <small>Data: ${formatDate(new Date(event.event_date))} • Criado por: ${users?.find(u => u.id === event.user_id)?.name || 'Usuário removido'}</small><br>
+                        <small>Status: ${event.active !== false ? 'Ativo' : 'Inativo'}</small>
+                    </div>
+                `).join('') || '<p>Nenhum evento criado.</p>';
 
+                document.getElementById('allEvents').innerHTML = eventsHtml;
             } catch (error) {
                 showNotification('Erro ao carregar dados: ' + error.message, 'error', 'adminNotification');
             }
         }
 
         async function approveUser(userId) {
-            if (!canModerate()) {
-                showNotification('Você não tem permissão para aprovar usuários.', 'error', 'adminNotification');
-                return;
-            }
-
             try {
                 const { error } = await supabase
                     .from('users')
-                    .update({ approved: true, active: true })
+                    .update({ approved: true })
                     .eq('id', userId);
 
                 if (error) throw error;
 
-                showNotification('Usuário aprovado com sucesso!', 'success', 'adminNotification');
+                showNotification('Usuário aprovado!', 'success', 'adminNotification');
                 await loadAdminData();
             } catch (error) {
-                showNotification('Erro ao aprovar usuário: ' + error.message, 'error', 'adminNotification');
+                showNotification('Erro ao aprovar: ' + error.message, 'error', 'adminNotification');
             }
         }
 
         async function rejectUser(userId) {
-            if (!canModerate()) {
-                showNotification('Você não tem permissão para rejeitar usuários.', 'error', 'adminNotification');
-                return;
-            }
-
-            if (!confirm('Tem certeza que deseja rejeitar este usuário?')) return;
-
             try {
                 const { error } = await supabase
                     .from('users')
@@ -2698,252 +1712,110 @@
 
                 if (error) throw error;
 
-                showNotification('Usuário rejeitado e removido.', 'success', 'adminNotification');
+                showNotification('Usuário rejeitado!', 'success', 'adminNotification');
                 await loadAdminData();
             } catch (error) {
-                showNotification('Erro ao rejeitar usuário: ' + error.message, 'error', 'adminNotification');
+                showNotification('Erro ao rejeitar: ' + error.message, 'error', 'adminNotification');
             }
         }
 
-        async function toggleUserStatus(userId, active) {
+        async function toggleUserStatus(userId, activate) {
             try {
                 const { error } = await supabase
                     .from('users')
-                    .update({ active })
+                    .update({ active: activate })
                     .eq('id', userId);
 
                 if (error) throw error;
 
-                showNotification(`Usuário ${active ? 'ativado' : 'desativado'} com sucesso!`, 'success', 'adminNotification');
+                showNotification(`Usuário ${activate ? 'ativado' : 'desativado'}!`, 'success', 'adminNotification');
                 await loadAdminData();
             } catch (error) {
                 showNotification('Erro ao alterar status: ' + error.message, 'error', 'adminNotification');
             }
         }
 
-        async function loginAsUser(userId) {
-            try {
-                const { data: user } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', userId)
-                    .single();
-
-                if (user) {
-                    currentUser = user;
-                    showUserDashboard();
-                }
-            } catch (error) {
-                showNotification('Erro ao entrar como usuário: ' + error.message, 'error', 'adminNotification');
-            }
-        }
-
-        async function viewUserPassword(userId) {
-            try {
-                const { data: user, error } = await supabase
-                    .from('users')
-                    .select('name, username, password')
-                    .eq('id', userId)
-                    .single();
-
-                if (error) throw error;
-
-                alert(`Dados do usuário ${user.name}:\n\nUsuário: ${user.username}\nSenha: ${user.password}`);
-            } catch (error) {
-                showNotification('Erro ao buscar senha: ' + error.message, 'error', 'adminNotification');
-            }
-        }
-
-        async function changeUserPassword(userId) {
-            const newPassword = prompt('Digite a nova senha para o usuário:');
-            if (!newPassword) return;
-
+        async function toggleModerator(userId, makeModerator) {
             try {
                 const { error } = await supabase
                     .from('users')
-                    .update({ password: newPassword })
+                    .update({ is_moderator: makeModerator })
                     .eq('id', userId);
 
                 if (error) throw error;
 
-                showNotification('Senha alterada com sucesso!', 'success', 'adminNotification');
-            } catch (error) {
-                showNotification('Erro ao alterar senha: ' + error.message, 'error', 'adminNotification');
-            }
-        }
-
-        async function manageUserPermissions(userId) {
-            try {
-                const { data: user, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', userId)
-                    .single();
-
-                if (error) throw error;
-
-                const isModerator = user.is_moderator || false;
-                const canDeleteEvents = user.can_delete_events !== false;
-
-                const permissionsHtml = `
-                    <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; margin: 20px auto;">
-                        <h3 style="margin-bottom: 20px; color: #667eea;">⚙️ Gerenciar Permissões - ${user.name}</h3>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                                <input type="checkbox" id="isModerator" ${isModerator ? 'checked' : ''}>
-                                <div>
-                                    <strong>👑 Moderador</strong>
-                                    <br><small style="color: #666;">Pode aprovar novos usuários e acessar painel administrativo</small>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                                <input type="checkbox" id="canDeleteEvents" ${canDeleteEvents ? 'checked' : ''}>
-                                <div>
-                                    <strong>🗑️ Excluir Eventos</strong>
-                                    <br><small style="color: #666;">Pode excluir seus próprios eventos</small>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <div style="display: flex; gap: 10px; margin-top: 25px;">
-                            <button class="btn btn-primary" onclick="saveUserPermissions('${userId}')">💾 Salvar</button>
-                            <button class="btn btn-secondary" onclick="loadAdminData()">❌ Cancelar</button>
-                        </div>
-                    </div>
-                `;
-
-                document.getElementById('userManagement').innerHTML = permissionsHtml;
-            } catch (error) {
-                showNotification('Erro ao carregar permissões: ' + error.message, 'error', 'adminNotification');
-            }
-        }
-
-        async function saveUserPermissions(userId) {
-            try {
-                const isModerator = document.getElementById('isModerator').checked;
-                const canDeleteEvents = document.getElementById('canDeleteEvents').checked;
-
-                const { error } = await supabase
-                    .from('users')
-                    .update({
-                        is_moderator: isModerator,
-                        can_delete_events: canDeleteEvents
-                    })
-                    .eq('id', userId);
-
-                if (error) throw error;
-
-                showNotification('Permissões atualizadas com sucesso!', 'success', 'adminNotification');
+                showNotification(`${makeModerator ? 'Moderador adicionado' : 'Moderador removido'}!`, 'success', 'adminNotification');
                 await loadAdminData();
             } catch (error) {
-                showNotification('Erro ao salvar permissões: ' + error.message, 'error', 'adminNotification');
+                showNotification('Erro ao alterar moderador: ' + error.message, 'error', 'adminNotification');
             }
         }
 
-        async function deleteUser(userId) {
-            if (!confirm('Tem certeza que deseja eliminar este usuário? Esta ação não pode ser desfeita.')) return;
-
-            try {
-                const { error } = await supabase
-                    .from('users')
-                    .delete()
-                    .eq('id', userId);
-
-                if (error) throw error;
-
-                showNotification('Usuário eliminado com sucesso!', 'success', 'adminNotification');
-                await loadAdminData();
-            } catch (error) {
-                showNotification('Erro ao eliminar usuário: ' + error.message, 'error', 'adminNotification');
-            }
+        // Password Modal Functions
+        function showPasswordModal(message, action) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalPassword').value = '';
+            document.getElementById('passwordModal').classList.remove('hidden');
+            pendingAction = action;
+            document.getElementById('modalPassword').focus();
         }
 
-        async function viewEventResponsesAdmin(eventId) {
-            await viewResponses(eventId);
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+            pendingAction = null;
         }
 
-        async function downloadEventReport(eventId) {
-            await downloadReport(eventId);
-        }
-
-        async function toggleEventStatusAdmin(eventId, activate) {
-            try {
-                const { error } = await supabase
-                    .from('events')
-                    .update({ active: activate })
-                    .eq('id', eventId);
-
-                if (error) throw error;
-
-                showNotification(`Evento ${activate ? 'ativado' : 'desativado'} com sucesso!`, 'success', 'adminNotification');
-                await loadAdminData();
-            } catch (error) {
-                showNotification('Erro ao alterar status do evento: ' + error.message, 'error', 'adminNotification');
-            }
-        }
-
-        async function deleteEventAdmin(eventId) {
-            if (!confirm('Tem certeza que deseja excluir este evento?')) return;
+        async function confirmPasswordAction() {
+            const password = document.getElementById('modalPassword').value;
             
-            try {
-                const { error } = await supabase
-                    .from('events')
-                    .delete()
-                    .eq('id', eventId);
+            if (!password) {
+                showNotification('Digite sua senha.', 'error', 'adminNotification');
+                return;
+            }
 
-                if (error) throw error;
+            let isValidPassword = false;
+            
+            if (currentUser.isAdmin && password === '#Invites2025@!!1995') {
+                isValidPassword = true;
+            } else if (!currentUser.isAdmin) {
+                try {
+                    const { data: user } = await supabase
+                        .from('users')
+                        .select('password')
+                        .eq('id', currentUser.id)
+                        .single();
+                    
+                    if (user && user.password === password) {
+                        isValidPassword = true;
+                    }
+                } catch (error) {
+                    console.error('Error verifying password:', error);
+                }
+            }
 
-                showNotification('Evento excluído com sucesso!', 'success', 'adminNotification');
-                await loadAdminData();
-            } catch (error) {
-                showNotification('Erro ao excluir evento: ' + error.message, 'error', 'adminNotification');
+            if (!isValidPassword) {
+                showNotification('Senha incorreta.', 'error', 'adminNotification');
+                return;
+            }
+
+            closePasswordModal();
+            
+            if (pendingAction) {
+                await pendingAction();
+                pendingAction = null;
             }
         }
 
-        // View Management Functions
+        // Navigation Functions
         function hideAllViews() {
-            const views = ['guestView', 'loginView', 'registerView', 'pendingView', 'userDashboard', 'createEventView', 'adminDashboard'];
-            views.forEach(view => {
-                document.getElementById(view).classList.add('hidden');
+            document.querySelectorAll('#app > div').forEach(view => {
+                view.classList.add('hidden');
             });
         }
 
         function showGuestView() {
             hideAllViews();
             document.getElementById('guestView').classList.remove('hidden');
-            updateBodyClass();
-            updateLoginButtons();
-        }
-
-        function updateLoginButtons() {
-            const loginBtn = document.getElementById('loginButtonTop');
-            const logoutBtn = document.getElementById('logoutButtonTop');
-            
-            if (currentUser && isEventPage) {
-                loginBtn.style.display = 'none';
-                logoutBtn.style.display = 'block';
-            } else if (!currentUser && isEventPage) {
-                loginBtn.style.display = 'block';
-                logoutBtn.style.display = 'none';
-            } else {
-                // Hide both buttons when not on event page
-                loginBtn.style.display = 'none';
-                logoutBtn.style.display = 'none';
-            }
-        }
-
-        function goToProfile() {
-            if (!currentUser) return;
-            
-            if (currentUser.isAdmin) {
-                showAdminDashboard();
-            } else {
-                showUserDashboard();
-            }
         }
 
         function showLogin() {
@@ -2956,59 +1828,59 @@
             document.getElementById('registerView').classList.remove('hidden');
         }
 
-        function showPendingView() {
-            hideAllViews();
-            document.getElementById('pendingView').classList.remove('hidden');
-        }
-
         function showCreateEvent() {
             hideAllViews();
             document.getElementById('createEventView').classList.remove('hidden');
-            if (!editingEventId) {
-                document.getElementById('eventFormTitle').textContent = 'Criar Evento';
-                document.getElementById('eventForm').reset();
-                document.getElementById('eventTimeEnabled').checked = false;
-                document.getElementById('deadlineTimeEnabled').checked = false;
-                document.getElementById('coverPreview').classList.add('hidden');
-                document.getElementById('maxCompanions').value = 5;
-                coverPosition = { x: 50, y: 50 };
-                toggleEventTime();
-                toggleDeadlineTime();
+            document.getElementById('eventFormTitle').textContent = editingEventId ? 'Editar Evento' : 'Criar Evento';
+        }
+
+        function backToMain() {
+            if (currentEvent) {
+                showGuestView();
+            } else {
+                showGuestView();
             }
         }
 
-        function toggleCoverUpload() {
-            const enabled = document.getElementById('eventCoverEnabled').checked;
-            const uploadGroup = document.getElementById('coverUploadGroup');
-            if (enabled) {
-                uploadGroup.classList.remove('hidden');
-            } else {
-                uploadGroup.classList.add('hidden');
-                document.getElementById('coverPreview').classList.add('hidden');
+        function goToProfile() {
+            if (currentUser && currentUser.isAdmin) {
+                showAdminDashboard();
+            } else if (currentUser && currentUser.approved) {
+                showUserDashboard();
             }
         }
 
-        function toggleEventTime() {
-            const enabled = document.getElementById('eventTimeEnabled').checked;
-            const timeInput = document.getElementById('eventTime');
-            if (enabled) {
-                timeInput.classList.remove('hidden');
+        function updateTopNav() {
+            const loginBtn = document.getElementById('loginBtn');
+            const profileBtn = document.getElementById('profileBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (currentUser) {
+                loginBtn.classList.add('hidden');
+                profileBtn.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
             } else {
-                timeInput.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                profileBtn.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
             }
         }
 
-        function toggleDeadlineTime() {
-            const enabled = document.getElementById('deadlineTimeEnabled').checked;
-            const timeInput = document.getElementById('deadlineTime');
-            if (enabled) {
-                timeInput.classList.remove('hidden');
-            } else {
-                timeInput.classList.add('hidden');
-            }
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            location.reload();
         }
 
         // Utility Functions
+        function formatDate(date) {
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
         function showNotification(message, type, containerId = 'guestContent') {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -3017,86 +1889,19 @@
             notification.className = `notification ${type}`;
             notification.innerHTML = message;
 
-            if (containerId === 'guestContent') {
-                container.insertBefore(notification, container.firstChild);
-            } else {
-                container.innerHTML = `<div class="notification ${type}">${message}</div>`;
+            const existingNotification = container.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
             }
+
+            container.insertBefore(notification, container.firstChild);
 
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.remove();
                 }
-            }, 8000);
-        }
-
-        function formatDate(date) {
-            return date.toLocaleString('pt-BR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function formatEventDate(date, includeTime) {
-            if (includeTime) {
-                return date.toLocaleString('pt-BR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            } else {
-                return date.toLocaleDateString('pt-BR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                });
-            }
-        }
-
-        function togglePasswordVisibility(inputId) {
-            const input = document.getElementById(inputId);
-            const button = input.nextElementSibling;
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.textContent = '🙈';
-                button.title = 'Ocultar senha';
-            } else {
-                input.type = 'password';
-                button.textContent = '👁️';
-                button.title = 'Mostrar senha';
-            }
-        }
-
-        // Admin-only functions (placeholder)
-        function exportAllData() {
-            if (!currentUser || !currentUser.isAdmin) {
-                showNotification('Acesso negado. Apenas administradores principais.', 'error', 'adminNotification');
-                return;
-            }
-            showNotification('Função de exportação em desenvolvimento.', 'info', 'adminNotification');
-        }
-
-        function systemSettings() {
-            if (!currentUser || !currentUser.isAdmin) {
-                showNotification('Acesso negado. Apenas administradores principais.', 'error', 'adminNotification');
-                return;
-            }
-            showNotification('Configurações do sistema em desenvolvimento.', 'info', 'adminNotification');
-        }
-
-        function systemMaintenance() {
-            if (!currentUser || !currentUser.isAdmin) {
-                showNotification('Acesso negado. Apenas administradores principais.', 'error', 'adminNotification');
-                return;
-            }
-            showNotification('Ferramentas de manutenção em desenvolvimento.', 'info', 'adminNotification');
+            }, 5000);
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97562b86840b77e3',t:'MTc1NjI0MTA5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9758e7d226b677e3',t:'MTc1NjI2OTc4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
