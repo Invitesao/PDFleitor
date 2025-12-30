@@ -11,6 +11,10 @@
         
         body {
             box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         
         .elegant-font {
@@ -158,9 +162,9 @@
       <h2 class="text-3xl font-bold elegant-font" style="color: #8B0000;">Área do Organizador</h2>
      </div>
      <form id="login-form" class="space-y-5">
-      <div><label for="admin-username" class="block text-sm font-semibold mb-2" style="color: #8B0000;"> Usuário </label> <input type="text" id="admin-username" required class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none" style="border-color: #8B0000;">
+      <div><label for="admin-username" class="block text-sm font-semibold mb-2" style="color: #8B0000;"> Usuário </label> <input type="text" id="admin-username" required autocomplete="off" class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none" style="border-color: #8B0000;">
       </div>
-      <div><label for="admin-password" class="block text-sm font-semibold mb-2" style="color: #8B0000;"> Senha </label> <input type="password" id="admin-password" required class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none" style="border-color: #8B0000;">
+      <div><label for="admin-password" class="block text-sm font-semibold mb-2" style="color: #8B0000;"> Senha </label> <input type="password" id="admin-password" required autocomplete="new-password" class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none" style="border-color: #8B0000;">
       </div>
       <div id="login-error" style="display: none;" class="text-sm text-center p-3 bg-red-100 border border-red-400 rounded-xl text-red-800">
        Usuário ou senha incorretos
@@ -303,7 +307,7 @@
        <div class="space-y-6">
         <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-6 border-2" style="border-color: #f59e0b;"><label class="block text-lg font-bold mb-3" style="color: #92400e;"> Nome da Aniversariante: </label> <input type="text" id="edit-nome" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-4" style="border-color: #f59e0b;"> <button id="salvar-config-btn" class="w-full py-3 rounded-xl text-white font-bold text-lg hover:opacity-90 transition-all" style="background-color: #8B0000;"> Salvar Alterações </button>
         </div>
-        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2" style="border-color: #3b82f6;"><label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data do Evento: </label> <input type="text" id="edit-data" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-4" style="border-color: #3b82f6;" placeholder="Ex: 21 de Março de 2026"> <label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data Limite para Confirmação: </label> <input type="date" id="edit-data-limite" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white" style="border-color: #3b82f6;">
+        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2" style="border-color: #3b82f6;"><label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data do Evento: </label> <input type="text" id="edit-data" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-4" style="border-color: #3b82f6;" placeholder="Ex: 15 de Janeiro de 2026"> <label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data Limite para Confirmação: </label> <input type="date" id="edit-data-limite" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white" style="border-color: #3b82f6;">
          <p class="text-sm text-gray-600 mt-2">Após esta data, os convidados não poderão mais confirmar presença</p>
         </div>
         <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border-2" style="border-color: #ef4444;"><label class="block text-lg font-bold mb-3" style="color: #991b1b;"> Texto do Aviso: </label> <input type="text" id="edit-aviso" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-4" style="border-color: #ef4444;">
@@ -348,12 +352,12 @@
         let temLinkValido = false;
         let configuracaoEvento = {
             nome_aniversariante: 'Catarina Bastos Pires',
-            data_evento: '21 de Março de 2026',
+            data_evento: '15 de Janeiro de 2026',
             aviso_criancas: 'Por favor, não levar crianças',
             mostrar_aviso: true,
             admin_username: 'catarina',
             admin_password: 'catarina2026',
-            data_evento_timestamp: new Date('2026-03-21T20:00:00').getTime(),
+            data_evento_timestamp: new Date('2026-01-15T20:00:00').getTime(),
             data_limite_confirmacao: null
         };
 
@@ -400,8 +404,6 @@
             const avisoDataLimite = document.getElementById('aviso-data-limite');
             const dataLimiteDisplay = document.getElementById('data-limite-display');
             
-            console.log('Data limite configurada:', configuracaoEvento.data_limite_confirmacao);
-            
             if (configuracaoEvento.data_limite_confirmacao && configuracaoEvento.data_limite_confirmacao.trim() !== '') {
                 try {
                     const dataLimite = new Date(configuracaoEvento.data_limite_confirmacao + 'T23:59:59');
@@ -410,8 +412,6 @@
                         month: 'long', 
                         year: 'numeric' 
                     });
-                    
-                    console.log('Mostrando aviso com data:', dataFormatada);
                     
                     if (dataLimiteDisplay) {
                         dataLimiteDisplay.textContent = dataFormatada;
@@ -426,7 +426,6 @@
                     }
                 }
             } else {
-                console.log('Escondendo aviso - sem data limite');
                 if (avisoDataLimite) {
                     avisoDataLimite.style.display = 'none';
                 }
@@ -438,7 +437,7 @@
             if (!configuracaoEvento.data_limite_confirmacao) return;
             
             const dataLimite = new Date(configuracaoEvento.data_limite_confirmacao);
-            dataLimite.setHours(23, 59, 59, 999); // Fim do dia
+            dataLimite.setHours(23, 59, 59, 999);
             const agora = new Date();
             
             if (agora > dataLimite) {
@@ -458,7 +457,6 @@
                     </div>
                 `;
                 
-                // Esconder aviso de data limite se o prazo já passou
                 const avisoDataLimite = document.getElementById('aviso-data-limite');
                 if (avisoDataLimite) {
                     avisoDataLimite.style.display = 'none';
@@ -483,12 +481,7 @@
             if (novoUsername) configuracaoEvento.admin_username = novoUsername;
             if (novoPassword) configuracaoEvento.admin_password = novoPassword;
             
-            // Salvar data limite (pode ser vazia para remover o prazo)
             configuracaoEvento.data_limite_confirmacao = novaDataLimite || null;
-
-            console.log('🔵 INICIANDO SALVAMENTO');
-            console.log('Data limite escolhida:', novaDataLimite);
-            console.log('Configuração completa:', configuracaoEvento);
 
             try {
                 const { data: existing, error: selectError } = await supabaseClient
@@ -497,17 +490,12 @@
                     .limit(1)
                     .single();
 
-                console.log('🔍 Registro existente:', existing);
-                console.log('Erro no select:', selectError);
-
                 if (selectError && selectError.code !== 'PGRST116') {
                     throw selectError;
                 }
 
                 let resultado;
                 if (existing) {
-                    console.log('✏️ ATUALIZANDO registro ID:', existing.id);
-                    
                     resultado = await supabaseClient
                         .from('configuracao')
                         .update({
@@ -522,11 +510,7 @@
                         })
                         .eq('id', existing.id)
                         .select();
-                    
-                    console.log('✅ Resultado UPDATE:', resultado);
                 } else {
-                    console.log('➕ CRIANDO novo registro');
-                    
                     resultado = await supabaseClient
                         .from('configuracao')
                         .insert([{
@@ -540,21 +524,11 @@
                             data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao
                         }])
                         .select();
-                    
-                    console.log('✅ Resultado INSERT:', resultado);
                 }
 
                 if (resultado.error) {
-                    console.error('❌ ERRO DO SUPABASE:');
-                    console.error('Código:', resultado.error.code);
-                    console.error('Mensagem:', resultado.error.message);
-                    console.error('Detalhes:', resultado.error.details);
-                    console.error('Hint:', resultado.error.hint);
                     throw resultado.error;
                 }
-
-                console.log('🎉 SALVO COM SUCESSO!');
-                console.log('Dados salvos:', resultado.data);
 
                 atualizarInterfaceConvidado();
                 verificarDataLimite();
@@ -565,8 +539,7 @@
                 document.body.appendChild(sucesso);
                 setTimeout(() => sucesso.remove(), 3000);
             } catch (err) {
-                console.error('    ERRO FATAL:', err);
-                console.error('Stack:', err.stack);
+                console.error('Erro ao salvar:', err);
                 
                 const erro = document.createElement('div');
                 erro.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-100 border-2 border-red-400 px-6 py-3 rounded-xl shadow-lg z-50';
@@ -739,8 +712,7 @@
             const countdownElement = document.getElementById('countdown');
             if (!countdownElement) return;
             
-            // Data do evento: 21 de Março de 2026 às 20:00
-            const dataEvento = new Date('2026-03-21T20:00:00-03:00');
+            const dataEvento = new Date(configuracaoEvento.data_evento_timestamp);
             const agora = new Date();
             const diferenca = dataEvento - agora;
 
@@ -1114,7 +1086,8 @@
                 return acc + 1 + (c.tem_acompanhante ? 1 : 0);
             }, 0);
 
-            document.getElementById('stat-confirmados').textContent = confirmados.length;
+            // CORREÇÃO: Contabilizar convidado + acompanhante como pessoas separadas
+            document.getElementById('stat-confirmados').textContent = totalPessoas;
             document.getElementById('stat-declinados').textContent = declinados.length;
             document.getElementById('stat-acompanhantes').textContent = comAcompanhante;
             document.getElementById('stat-pessoas').textContent = totalPessoas;
@@ -1500,7 +1473,7 @@
                     
                     <div class="stats">
                         <div class="stat-box">
-                            <div class="number">${confirmados.length}</div>
+                            <div class="number">${totalPessoas}</div>
                             <div class="label">Confirmados</div>
                         </div>
                         <div class="stat-box">
@@ -1592,6 +1565,45 @@
             const nomeConvidadoSalvo = localStorage.getItem('nomeConvidado');
             const adminLogado = localStorage.getItem('adminLogado');
 
+            // SE EXISTE ?tipo= NA URL, SEMPRE MOSTRA PÁGINA DO CONVIDADO
+            if (tipo === 'sem' || tipo === 'com') {
+                // Limpar login admin se existir
+                localStorage.removeItem('adminLogado');
+                isAdminLogado = false;
+                
+                document.getElementById('guest-page').style.display = 'block';
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('admin-page').style.display = 'none';
+                document.getElementById('admin-link').style.display = 'block';
+
+                if (nomeConvidadoSalvo) {
+                    setTimeout(() => {
+                        const resposta = todasConfirmacoes.find(c => 
+                            c.nome_convidado.toLowerCase() === nomeConvidadoSalvo.toLowerCase()
+                        );
+
+                        if (resposta) {
+                            usuarioRespondeu = true;
+                            nomeConvidadoAtual = nomeConvidadoSalvo;
+                            
+                            document.getElementById('confirmation-form').style.display = 'none';
+                            document.getElementById('recados-section').style.display = 'block';
+                            document.getElementById('nome-recado').value = nomeConvidadoSalvo;
+                            document.getElementById('nome-recado-field').style.display = 'none';
+
+                            if (resposta.confirmou_presenca) {
+                                document.getElementById('success-state').style.display = 'block';
+                            } else {
+                                document.getElementById('decline-state').style.display = 'block';
+                            }
+                        }
+                    }, 500);
+                }
+                
+                return;
+            }
+
+            // SE NÃO TEM ?tipo= NA URL
             if (adminLogado === 'true') {
                 isAdminLogado = true;
                 document.getElementById('guest-page').style.display = 'none';
@@ -1611,43 +1623,33 @@
                 return;
             }
 
-            if (!tipo || (tipo !== 'sem' && tipo !== 'com')) {
-                document.getElementById('guest-page').style.display = 'none';
-                document.getElementById('login-page').style.display = 'flex';
-                document.getElementById('admin-page').style.display = 'none';
-                document.getElementById('voltar-button').style.display = 'none';
-                return;
-            }
-
-            document.getElementById('guest-page').style.display = 'block';
-            document.getElementById('login-page').style.display = 'none';
+            // Caso padrão: mostrar login
+            document.getElementById('guest-page').style.display = 'none';
+            document.getElementById('login-page').style.display = 'flex';
             document.getElementById('admin-page').style.display = 'none';
-            document.getElementById('admin-link').style.display = 'block';
-
-            if (nomeConvidadoSalvo) {
-                setTimeout(() => {
-                    const resposta = todasConfirmacoes.find(c => 
-                        c.nome_convidado.toLowerCase() === nomeConvidadoSalvo.toLowerCase()
-                    );
-
-                    if (resposta) {
-                        usuarioRespondeu = true;
-                        nomeConvidadoAtual = nomeConvidadoSalvo;
-                        
-                        document.getElementById('confirmation-form').style.display = 'none';
-                        document.getElementById('recados-section').style.display = 'block';
-                        document.getElementById('nome-recado').value = nomeConvidadoSalvo;
-                        document.getElementById('nome-recado-field').style.display = 'none';
-
-                        if (resposta.confirmou_presenca) {
-                            document.getElementById('success-state').style.display = 'block';
-                        } else {
-                            document.getElementById('decline-state').style.display = 'block';
-                        }
-                    }
-                }, 500);
-            }
+            document.getElementById('voltar-button').style.display = 'none';
         }
+
+        // ==================== BLOQUEAR COPIAR/COLAR ====================
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('paste', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
 
         // ==================== INICIALIZAÇÃO ====================
         document.addEventListener('DOMContentLoaded', function() {
@@ -1716,5 +1718,5 @@
             document.getElementById('recado-form').addEventListener('submit', enviarRecado);
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b2dff98c07fc13d',t:'MTc2NjU1NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b634d0c04f6c13d',t:'MTc2NzExNjIwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
