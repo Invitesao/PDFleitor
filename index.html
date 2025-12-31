@@ -47,7 +47,8 @@
             transition: transform 0.3s ease;
         }
 
-        #toggle-aviso-criancas:checked ~ #toggle-dot {
+        #toggle-aviso-criancas:checked ~ #toggle-dot,
+        #toggle-recados-publicos:checked ~ #toggle-dot-recados {
             transform: translateX(24px);
         }
 
@@ -307,7 +308,11 @@
        <div class="space-y-6">
         <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-6 border-2" style="border-color: #f59e0b;"><label class="block text-lg font-bold mb-3" style="color: #92400e;"> Nome da Aniversariante: </label> <input type="text" id="edit-nome" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-4" style="border-color: #f59e0b;"> <button id="salvar-config-btn" class="w-full py-3 rounded-xl text-white font-bold text-lg hover:opacity-90 transition-all" style="background-color: #8B0000;"> Salvar Alterações </button>
         </div>
-        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2" style="border-color: #3b82f6;"><label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data do Evento: </label> <input type="text" id="edit-data" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-4" style="border-color: #3b82f6;" placeholder="Ex: 15 de Janeiro de 2026"> <label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data Limite para Confirmação: </label> <input type="date" id="edit-data-limite" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white" style="border-color: #3b82f6;">
+        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2" style="border-color: #3b82f6;"><label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data do Evento (texto que aparece no convite): </label> <input type="text" id="edit-data" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-6" style="border-color: #3b82f6;" placeholder="Ex: 15 de Janeiro de 2026, às 20:00"> <label class="block text-lg font-bold mb-3" style="color: #1e40af;"> 📅 Data e Hora EXATA do Evento (para contagem regressiva): </label>
+         <div class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 mb-3">
+          <p class="text-sm text-yellow-900 font-bold mb-2">⚠️ IMPORTANTE:</p>
+          <p class="text-sm text-yellow-800">Coloque aqui a data e hora EXATA do aniversário para a contagem regressiva funcionar!</p>
+         </div><input type="datetime-local" id="edit-data-evento-timestamp" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-6" style="border-color: #3b82f6;"> <label class="block text-lg font-bold mb-3" style="color: #1e40af;"> Data Limite para Confirmação: </label> <input type="date" id="edit-data-limite" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white" style="border-color: #3b82f6;">
          <p class="text-sm text-gray-600 mt-2">Após esta data, os convidados não poderão mais confirmar presença</p>
         </div>
         <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border-2" style="border-color: #ef4444;"><label class="block text-lg font-bold mb-3" style="color: #991b1b;"> Texto do Aviso: </label> <input type="text" id="edit-aviso" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-4" style="border-color: #ef4444;">
@@ -318,6 +323,17 @@
           <div class="relative ml-4"><input type="checkbox" id="toggle-aviso-criancas" class="sr-only" checked>
            <div id="toggle-bg" class="block w-16 h-9 rounded-full transition-colors cursor-pointer" style="background-color: #6f0000;"></div>
            <div id="toggle-dot" class="dot absolute left-1 top-1 bg-white w-7 h-7 rounded-full transition-transform pointer-events-none"></div>
+          </div>
+         </div>
+        </div>
+        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border-2" style="border-color: #8b5cf6;"><label class="block text-lg font-bold mb-3" style="color: #5b21b6;"> Recados dos Convidados: </label>
+         <div class="flex items-center justify-between">
+          <div class="flex-1"><label class="block text-base font-bold" style="color: #5b21b6;"> Permitir que convidados vejam recados de outros </label>
+           <p class="text-sm text-gray-600 mt-1">Quando ativado, todos os recados ficam visíveis para quem entrar no link</p>
+          </div>
+          <div class="relative ml-4"><input type="checkbox" id="toggle-recados-publicos" class="sr-only" checked>
+           <div id="toggle-bg-recados" class="block w-16 h-9 rounded-full transition-colors cursor-pointer" style="background-color: #6f0000;"></div>
+           <div id="toggle-dot-recados" class="dot absolute left-1 top-1 bg-white w-7 h-7 rounded-full transition-transform pointer-events-none"></div>
           </div>
          </div>
         </div>
@@ -358,7 +374,8 @@
             admin_username: 'catarina',
             admin_password: 'catarina2026',
             data_evento_timestamp: new Date('2026-01-15T20:00:00').getTime(),
-            data_limite_confirmacao: null
+            data_limite_confirmacao: null,
+            mostrar_recados_publicos: true
         };
 
         // ==================== CARREGAR CONFIGURAÇÃO ====================
@@ -381,7 +398,8 @@
                         admin_username: data.admin_username || configuracaoEvento.admin_username,
                         admin_password: data.admin_password || configuracaoEvento.admin_password,
                         data_evento_timestamp: data.data_evento_timestamp || configuracaoEvento.data_evento_timestamp,
-                        data_limite_confirmacao: data.data_limite_confirmacao || null
+                        data_limite_confirmacao: data.data_limite_confirmacao || null,
+                        mostrar_recados_publicos: data.mostrar_recados_publicos !== undefined ? data.mostrar_recados_publicos : configuracaoEvento.mostrar_recados_publicos
                     };
                 }
             } catch (err) {
@@ -399,6 +417,15 @@
             
             const avisoContainer = document.getElementById('aviso-container');
             avisoContainer.style.display = configuracaoEvento.mostrar_aviso ? 'block' : 'none';
+
+            // Atualizar visibilidade dos recados públicos
+            const listaRecados = document.getElementById('lista-recados');
+            if (configuracaoEvento.mostrar_recados_publicos) {
+                listaRecados.style.display = 'block';
+                renderizarRecados();
+            } else {
+                listaRecados.innerHTML = '<p class="text-gray-400 text-center py-6 text-base">Os recados estão desativados no momento.</p>';
+            }
 
             // Atualizar aviso de data limite - SEMPRE mostra se existir data
             const avisoDataLimite = document.getElementById('aviso-data-limite');
@@ -474,6 +501,7 @@
             const novoUsername = document.getElementById('edit-username').value.trim();
             const novoPassword = document.getElementById('edit-password').value.trim();
             const novaDataLimite = document.getElementById('edit-data-limite').value;
+            const novaDataEventoTimestamp = document.getElementById('edit-data-evento-timestamp').value;
 
             if (novoNome) configuracaoEvento.nome_aniversariante = novoNome;
             if (novaData) configuracaoEvento.data_evento = novaData;
@@ -482,6 +510,11 @@
             if (novoPassword) configuracaoEvento.admin_password = novoPassword;
             
             configuracaoEvento.data_limite_confirmacao = novaDataLimite || null;
+            
+            // Atualizar timestamp da data do evento
+            if (novaDataEventoTimestamp) {
+                configuracaoEvento.data_evento_timestamp = new Date(novaDataEventoTimestamp).getTime();
+            }
 
             try {
                 const { data: existing, error: selectError } = await supabaseClient
@@ -506,7 +539,8 @@
                             admin_username: configuracaoEvento.admin_username,
                             admin_password: configuracaoEvento.admin_password,
                             data_evento_timestamp: configuracaoEvento.data_evento_timestamp,
-                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao
+                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao,
+                            mostrar_recados_publicos: configuracaoEvento.mostrar_recados_publicos
                         })
                         .eq('id', existing.id)
                         .select();
@@ -521,7 +555,8 @@
                             admin_username: configuracaoEvento.admin_username,
                             admin_password: configuracaoEvento.admin_password,
                             data_evento_timestamp: configuracaoEvento.data_evento_timestamp,
-                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao
+                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao,
+                            mostrar_recados_publicos: configuracaoEvento.mostrar_recados_publicos
                         }])
                         .select();
                 }
@@ -583,6 +618,42 @@
             } else {
                 toggleBg.style.backgroundColor = '#d1d5db';
                 toggleDot.style.transform = 'translateX(0)';
+            }
+        }
+
+        async function toggleRecadosPublicos(mostrar) {
+            if (!supabaseClient) return;
+            
+            configuracaoEvento.mostrar_recados_publicos = mostrar;
+            
+            try {
+                const { data: existing } = await supabaseClient
+                    .from('configuracao')
+                    .select('id')
+                    .limit(1)
+                    .single();
+
+                if (existing) {
+                    await supabaseClient
+                        .from('configuracao')
+                        .update({ mostrar_recados_publicos: mostrar })
+                        .eq('id', existing.id);
+                }
+            } catch (err) {
+                console.error('Erro ao atualizar recados públicos:', err);
+            }
+
+            atualizarInterfaceConvidado();
+            
+            const toggleBg2 = document.getElementById('toggle-bg-recados');
+            const toggleDot2 = document.getElementById('toggle-dot-recados');
+            
+            if (mostrar) {
+                toggleBg2.style.backgroundColor = '#6f0000';
+                toggleDot2.style.transform = 'translateX(24px)';
+            } else {
+                toggleBg2.style.backgroundColor = '#d1d5db';
+                toggleDot2.style.transform = 'translateX(0)';
             }
         }
 
@@ -1630,6 +1701,17 @@
                     document.getElementById('edit-data-limite').value = configuracaoEvento.data_limite_confirmacao;
                 }
                 
+                // Preencher data e hora do evento
+                if (configuracaoEvento.data_evento_timestamp) {
+                    const dataEvento = new Date(configuracaoEvento.data_evento_timestamp);
+                    const ano = dataEvento.getFullYear();
+                    const mes = String(dataEvento.getMonth() + 1).padStart(2, '0');
+                    const dia = String(dataEvento.getDate()).padStart(2, '0');
+                    const hora = String(dataEvento.getHours()).padStart(2, '0');
+                    const minuto = String(dataEvento.getMinutes()).padStart(2, '0');
+                    document.getElementById('edit-data-evento-timestamp').value = `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+                }
+                
                 carregarDados();
                 return;
             }
@@ -1702,6 +1784,17 @@
                         document.getElementById('edit-data-limite').value = configuracaoEvento.data_limite_confirmacao;
                     }
                     
+                    // Preencher data e hora do evento
+                    if (configuracaoEvento.data_evento_timestamp) {
+                        const dataEvento = new Date(configuracaoEvento.data_evento_timestamp);
+                        const ano = dataEvento.getFullYear();
+                        const mes = String(dataEvento.getMonth() + 1).padStart(2, '0');
+                        const dia = String(dataEvento.getDate()).padStart(2, '0');
+                        const hora = String(dataEvento.getHours()).padStart(2, '0');
+                        const minuto = String(dataEvento.getMinutes()).padStart(2, '0');
+                        document.getElementById('edit-data-evento-timestamp').value = `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+                    }
+                    
                     carregarDados();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
@@ -1722,6 +1815,11 @@
                 checkbox.checked = !checkbox.checked;
                 toggleAvisoCriancas(checkbox.checked);
             });
+            document.getElementById('toggle-bg-recados').addEventListener('click', function() {
+                const checkbox = document.getElementById('toggle-recados-publicos');
+                checkbox.checked = !checkbox.checked;
+                toggleRecadosPublicos(checkbox.checked);
+            });
             document.getElementById('mensagem-recado').addEventListener('input', function(e) {
                 const count = e.target.value.length;
                 document.getElementById('char-count').textContent = `${count}/500 caracteres`;
@@ -1729,5 +1827,5 @@
             document.getElementById('recado-form').addEventListener('submit', enviarRecado);
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b67eb9350a9c13d',t:'MTc2NzE2NDY0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b67f93f04e6c13d',t:'MTc2NzE2NTE5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
