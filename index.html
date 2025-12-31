@@ -1368,6 +1368,124 @@
             });
         }
 
+        // ==================== MODAL RESPOSTA ====================
+        function abrirModalResposta(recadoId, nomeConvidado, mensagemAtual = '', respostaId = null) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 flex items-center justify-center z-50 px-4';
+            modal.style.background = 'rgba(0,0,0,0.7)';
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl p-8 max-w-xl w-full shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-4" style="color: #8B0000;">
+                        ${respostaId ? 'Editar Resposta' : 'Responder Recado'}
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Respondendo para: <strong>${nomeConvidado}</strong>
+                    </p>
+                    
+                    <form id="form-resposta-admin" class="space-y-4">
+                        <div>
+                            <label class="block text-base font-semibold mb-2" style="color: #5d5d5d;">
+                                Sua Resposta:
+                            </label>
+                            <textarea 
+                                id="textarea-resposta-admin"
+                                required 
+                                rows="4"
+                                maxlength="500"
+                                class="w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none focus:ring-2 resize-none" 
+                                style="border-color: #8B0000;"
+                                placeholder="Escreva sua resposta carinhosa..."
+                            >${mensagemAtual}</textarea>
+                            <p class="text-sm text-gray-400 mt-1 text-right" id="char-count-resposta">${mensagemAtual.length}/500 caracteres</p>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button 
+                                type="button"
+                                class="cancelar-resposta-btn flex-1 py-3 rounded-xl border-2 font-bold" 
+                                style="border-color: #8B0000; color: #8B0000;"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                type="submit"
+                                class="flex-1 py-3 rounded-xl text-white font-bold" 
+                                style="background-color: #10b981;"
+                            >
+                                ${respostaId ? 'Salvar Alterações' : 'Enviar Resposta'}
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="loading-resposta" style="display: none;" class="text-center py-6">
+                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-transparent" style="border-color: #8B0000;"></div>
+                        <p class="text-base font-semibold mt-3" style="color: #8B0000;">Enviando...</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const textarea = modal.querySelector('#textarea-resposta-admin');
+            const charCount = modal.querySelector('#char-count-resposta');
+            
+            textarea.addEventListener('input', function() {
+                charCount.textContent = `${this.value.length}/500 caracteres`;
+            });
+            
+            modal.querySelector('.cancelar-resposta-btn').addEventListener('click', () => modal.remove());
+            
+            modal.querySelector('#form-resposta-admin').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const mensagem = textarea.value.trim();
+                if (!mensagem) return;
+                
+                this.style.display = 'none';
+                modal.querySelector('#loading-resposta').style.display = 'block';
+                
+                try {
+                    if (respostaId) {
+                        // Editar resposta existente
+                        const { error } = await supabaseClient
+                            .from('respostas_recados')
+                            .update({ mensagem: mensagem })
+                            .eq('id', respostaId);
+                        
+                        if (error) throw error;
+                    } else {
+                        // Criar nova resposta
+                        const { error } = await supabaseClient
+                            .from('respostas_recados')
+                            .insert([{
+                                recado_id: recadoId,
+                                mensagem: mensagem
+                            }]);
+                        
+                        if (error) throw error;
+                    }
+                    
+                    await carregarDados();
+                    modal.remove();
+                    
+                    const sucesso = document.createElement('div');
+                    sucesso.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 border-2 border-green-400 px-6 py-3 rounded-xl shadow-lg z-50';
+                    sucesso.innerHTML = '<p class="text-green-800 font-bold">✅ Resposta enviada com sucesso!</p>';
+                    document.body.appendChild(sucesso);
+                    setTimeout(() => sucesso.remove(), 3000);
+                } catch (err) {
+                    console.error('Erro:', err);
+                    modal.querySelector('#loading-resposta').style.display = 'none';
+                    this.style.display = 'block';
+                    
+                    const erro = document.createElement('div');
+                    erro.className = 'mt-4 p-3 bg-red-50 border-2 border-red-300 rounded-xl text-center';
+                    erro.innerHTML = '<p class="text-red-700 font-semibold">Erro ao enviar. Tente novamente.</p>';
+                    this.appendChild(erro);
+                    setTimeout(() => erro.remove(), 3000);
+                }
+            });
+        }
+
         // ==================== EXCLUIR RECADO ====================
         async function excluirRecado(id) {
             if (!supabaseClient) return;
@@ -1879,5 +1997,5 @@
             document.getElementById('recado-form').addEventListener('submit', enviarRecado);
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b680d14f402c13d',t:'MTc2NzE2NjAxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b6815c615d2c13d',t:'MTc2NzE2NjM2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
