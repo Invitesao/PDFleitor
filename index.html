@@ -420,11 +420,20 @@
 
             // Atualizar visibilidade dos recados públicos
             const listaRecados = document.getElementById('lista-recados');
+            const recadosSection = document.getElementById('recados-section');
+            
+            // A seção de recados SEMPRE está visível para permitir envio
+            if (recadosSection) {
+                recadosSection.style.display = 'block';
+            }
+            
+            // Mas a LISTA de recados só mostra se estiver ativado
             if (configuracaoEvento.mostrar_recados_publicos) {
-                listaRecados.style.display = 'block';
                 renderizarRecados();
             } else {
-                listaRecados.innerHTML = '<p class="text-gray-400 text-center py-6 text-base">Os recados estão desativados no momento.</p>';
+                if (listaRecados) {
+                    listaRecados.innerHTML = '<p class="text-gray-400 text-center py-6 text-base">A visualização dos recados está desativada no momento.</p>';
+                }
             }
 
             // Atualizar aviso de data limite - SEMPRE mostra se existir data
@@ -1249,7 +1258,7 @@
                 listaRecados.innerHTML = todosRecados.map(r => {
                     const dataObj = new Date(r.created_at);
                     const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-                                        ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                                        '   s ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                     
                     return `
                         <div class="border-2 rounded-2xl p-5 hover:shadow-lg transition-shadow" style="border-color: #FFD700; background: linear-gradient(to right, #fff9e6, #ffffff);">
@@ -1716,7 +1725,7 @@
                 return;
             }
 
-            // Caso padrão: mostrar login
+            // Caso padr  o: mostrar login
             document.getElementById('guest-page').style.display = 'none';
             document.getElementById('login-page').style.display = 'flex';
             document.getElementById('admin-page').style.display = 'none';
@@ -1827,5 +1836,5 @@
             document.getElementById('recado-form').addEventListener('submit', enviarRecado);
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b67f93f04e6c13d',t:'MTc2NzE2NTE5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b68005b9695c13d',t:'MTc2NzE2NTQ5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
