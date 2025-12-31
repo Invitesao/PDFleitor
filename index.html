@@ -120,16 +120,14 @@
        <p class="text-red-700 text-sm font-semibold">Erro ao processar resposta. Tente novamente.</p>
       </div>
      </div><!-- Seção de Recados -->
-     <div id="recados-section" class="mt-6" style="display: none;">
+     <div id="recados-section" class="mt-6" style="display: block;">
       <div class="bg-white rounded-2xl shadow-sm border p-6 md:p-8 fade-in" style="animation-delay: 0.5s; border-color: #e5ddd5;">
-       <div class="text-center mb-6">
+       <div class="text-center mb-6" id="recado-header">
         <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">Deixe um Recado</h2>
         <p class="text-base text-gray-600">Envie uma mensagem carinhosa para a aniversariante!</p>
        </div>
        <form id="recado-form" class="mb-8">
         <div class="space-y-4">
-         <div id="nome-recado-field"><label for="nome-recado" class="block text-base font-semibold mb-2" style="color: #5d5d5d;"> Seu Nome * </label> <input type="text" id="nome-recado" required class="w-full px-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 transition-all" style="border-color: #d4c4b0; background-color: #ffffff;" placeholder="Digite seu nome">
-         </div>
          <div><label for="mensagem-recado" class="block text-base font-semibold mb-2" style="color: #5d5d5d;"> Sua Mensagem * </label> <textarea id="mensagem-recado" required rows="4" maxlength="500" class="w-full px-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 transition-all resize-none" style="border-color: #d4c4b0; background-color: #ffffff;" placeholder="Escreva sua mensagem de carinho..."></textarea>
           <p class="text-sm text-gray-400 mt-1 text-right" id="char-count">0/500 caracteres</p>
          </div><button type="submit" id="recado-button" class="w-full py-4 rounded-xl text-white text-lg font-bold transition-all hover:opacity-90 shadow-lg" style="background-color: #6f0000;"> Enviar Recado </button>
@@ -420,14 +418,8 @@
 
             // Atualizar visibilidade dos recados públicos
             const listaRecados = document.getElementById('lista-recados');
-            const recadosSection = document.getElementById('recados-section');
             
-            // A seção de recados SEMPRE está visível para permitir envio
-            if (recadosSection) {
-                recadosSection.style.display = 'block';
-            }
-            
-            // Mas a LISTA de recados só mostra se estiver ativado
+            // A LISTA de recados só mostra se estiver ativado
             if (configuracaoEvento.mostrar_recados_publicos) {
                 renderizarRecados();
             } else {
@@ -978,9 +970,10 @@
                 usuarioRespondeu = true;
                 nomeConvidadoAtual = nomeConvidado;
                 localStorage.setItem('nomeConvidado', nomeConvidado);
+                
+                // Mostra seção de recados e permite enviar
                 document.getElementById('recados-section').style.display = 'block';
-                document.getElementById('nome-recado').value = nomeConvidado;
-                document.getElementById('nome-recado-field').style.display = 'none';
+                document.getElementById('recado-form').style.display = 'block';
 
                 await carregarDados();
             } catch (err) {
@@ -1060,9 +1053,21 @@
                 usuarioRespondeu = true;
                 nomeConvidadoAtual = nomeConvidado;
                 localStorage.setItem('nomeConvidado', nomeConvidado);
+                
+                // Mostra seção de recados MAS esconde o formulário de envio
                 document.getElementById('recados-section').style.display = 'block';
-                document.getElementById('nome-recado').value = nomeConvidado;
-                document.getElementById('nome-recado-field').style.display = 'none';
+                document.getElementById('recado-form').style.display = 'none';
+                
+                // Altera o cabeçalho para refletir que só pode visualizar
+                const recadoHeader = document.getElementById('recado-header');
+                recadoHeader.innerHTML = `
+                    <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">
+                        Recados dos Convidados
+                    </h2>
+                    <p class="text-base text-gray-600">
+                        Veja as mensagens carinhosas enviadas para a aniversariante!
+                    </p>
+                `;
 
                 await carregarDados();
             } catch (err) {
@@ -1083,6 +1088,20 @@
             document.getElementById('decline-state').style.display = 'none';
             document.getElementById('confirmation-form').style.display = 'block';
             
+            // Esconde a seção de recados enquanto edita
+            document.getElementById('recados-section').style.display = 'none';
+            
+            // Restaura o cabeçalho original
+            const recadoHeader = document.getElementById('recado-header');
+            recadoHeader.innerHTML = `
+                <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">
+                    Deixe um Recado
+                </h2>
+                <p class="text-base text-gray-600">
+                    Envie uma mensagem carinhosa para a aniversariante!
+                </p>
+            `;
+            
             const respostaAtual = todasConfirmacoes.find(c => 
                 c.nome_convidado.toLowerCase() === nomeConvidadoAtual.toLowerCase()
             );
@@ -1101,10 +1120,9 @@
             
             if (!supabaseClient) return;
             
-            const nome = document.getElementById('nome-recado').value.trim();
             const mensagem = document.getElementById('mensagem-recado').value.trim();
             
-            if (!nome || !mensagem) return;
+            if (!mensagem || !nomeConvidadoAtual) return;
 
             document.getElementById('recado-form').style.display = 'none';
             document.getElementById('recado-loading').style.display = 'block';
@@ -1114,7 +1132,7 @@
                 const { error } = await supabaseClient
                     .from('recados')
                     .insert([{
-                        nome_convidado: nome,
+                        nome_convidado: nomeConvidadoAtual,
                         mensagem: mensagem
                     }]);
 
@@ -1122,7 +1140,6 @@
 
                 document.getElementById('recado-loading').style.display = 'none';
                 document.getElementById('recado-success').style.display = 'block';
-                document.getElementById('nome-recado').value = '';
                 document.getElementById('mensagem-recado').value = '';
                 document.getElementById('char-count').textContent = '0/500 caracteres';
                 
@@ -1678,9 +1695,35 @@
                             nomeConvidadoAtual = nomeConvidadoSalvo;
                             
                             document.getElementById('confirmation-form').style.display = 'none';
+                            
+                            // SEMPRE mostra a seção de recados (para visualizar)
                             document.getElementById('recados-section').style.display = 'block';
-                            document.getElementById('nome-recado').value = nomeConvidadoSalvo;
-                            document.getElementById('nome-recado-field').style.display = 'none';
+                            
+                            // Mas o FORMULÁRIO de envio só fica visível se confirmou
+                            const recadoForm = document.getElementById('recado-form');
+                            const recadoHeader = document.getElementById('recado-header');
+                            
+                            if (resposta.confirmou_presenca) {
+                                recadoForm.style.display = 'block';
+                                recadoHeader.innerHTML = `
+                                    <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">
+                                        Deixe um Recado
+                                    </h2>
+                                    <p class="text-base text-gray-600">
+                                        Envie uma mensagem carinhosa para a aniversariante!
+                                    </p>
+                                `;
+                            } else {
+                                recadoForm.style.display = 'none';
+                                recadoHeader.innerHTML = `
+                                    <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">
+                                        Recados dos Convidados
+                                    </h2>
+                                    <p class="text-base text-gray-600">
+                                        Veja as mensagens carinhosas enviadas para a aniversariante!
+                                    </p>
+                                `;
+                            }
 
                             if (resposta.confirmou_presenca) {
                                 document.getElementById('success-state').style.display = 'block';
@@ -1836,5 +1879,5 @@
             document.getElementById('recado-form').addEventListener('submit', enviarRecado);
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b68005b9695c13d',t:'MTc2NzE2NTQ5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b680d14f402c13d',t:'MTc2NzE2NjAxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
