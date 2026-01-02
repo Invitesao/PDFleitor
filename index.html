@@ -47,7 +47,10 @@
             transition: transform 0.3s ease;
         }
 
-        #toggle-aviso-criancas:checked ~ #toggle-dot,
+        #toggle-aviso-criancas:checked ~ #toggle-dot {
+            transform: translateX(24px);
+        }
+
         #toggle-recados-publicos:checked ~ #toggle-dot-recados {
             transform: translateX(24px);
         }
@@ -120,7 +123,7 @@
        <p class="text-red-700 text-sm font-semibold">Erro ao processar resposta. Tente novamente.</p>
       </div>
      </div><!-- Seção de Recados -->
-     <div id="recados-section" class="mt-6" style="display: block;">
+     <div id="recados-section" class="mt-6" style="display: none;">
       <div class="bg-white rounded-2xl shadow-sm border p-6 md:p-8 fade-in" style="animation-delay: 0.5s; border-color: #e5ddd5;">
        <div class="text-center mb-6" id="recado-header">
         <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">Deixe um Recado</h2>
@@ -324,17 +327,6 @@
           </div>
          </div>
         </div>
-        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border-2" style="border-color: #8b5cf6;"><label class="block text-lg font-bold mb-3" style="color: #5b21b6;"> Recados dos Convidados: </label>
-         <div class="flex items-center justify-between">
-          <div class="flex-1"><label class="block text-base font-bold" style="color: #5b21b6;"> Permitir que convidados vejam recados de outros </label>
-           <p class="text-sm text-gray-600 mt-1">Quando ativado, todos os recados ficam visíveis para quem entrar no link</p>
-          </div>
-          <div class="relative ml-4"><input type="checkbox" id="toggle-recados-publicos" class="sr-only" checked>
-           <div id="toggle-bg-recados" class="block w-16 h-9 rounded-full transition-colors cursor-pointer" style="background-color: #6f0000;"></div>
-           <div id="toggle-dot-recados" class="dot absolute left-1 top-1 bg-white w-7 h-7 rounded-full transition-transform pointer-events-none"></div>
-          </div>
-         </div>
-        </div>
         <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border-2" style="border-color: #6366f1;"><label class="block text-lg font-bold mb-3" style="color: #4338ca;"> Usuário Admin: </label> <input type="text" id="edit-username" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white mb-3" style="border-color: #6366f1;"> <label class="block text-lg font-bold mb-3 mt-4" style="color: #4338ca;"> Senha Admin: </label> <input type="password" id="edit-password" class="w-full px-4 py-3 rounded-xl text-lg border-2 bg-white" style="border-color: #6366f1;">
         </div>
        </div>
@@ -372,8 +364,7 @@
             admin_username: 'catarina',
             admin_password: 'catarina2026',
             data_evento_timestamp: new Date('2026-01-15T20:00:00').getTime(),
-            data_limite_confirmacao: null,
-            mostrar_recados_publicos: true
+            data_limite_confirmacao: null
         };
 
         // ==================== CARREGAR CONFIGURAÇÃO ====================
@@ -396,8 +387,7 @@
                         admin_username: data.admin_username || configuracaoEvento.admin_username,
                         admin_password: data.admin_password || configuracaoEvento.admin_password,
                         data_evento_timestamp: data.data_evento_timestamp || configuracaoEvento.data_evento_timestamp,
-                        data_limite_confirmacao: data.data_limite_confirmacao || null,
-                        mostrar_recados_publicos: data.mostrar_recados_publicos !== undefined ? data.mostrar_recados_publicos : configuracaoEvento.mostrar_recados_publicos
+                        data_limite_confirmacao: data.data_limite_confirmacao || null
                     };
                 }
             } catch (err) {
@@ -416,17 +406,8 @@
             const avisoContainer = document.getElementById('aviso-container');
             avisoContainer.style.display = configuracaoEvento.mostrar_aviso ? 'block' : 'none';
 
-            // Atualizar visibilidade dos recados públicos
-            const listaRecados = document.getElementById('lista-recados');
-            
-            // A LISTA de recados só mostra se estiver ativado
-            if (configuracaoEvento.mostrar_recados_publicos) {
-                renderizarRecados();
-            } else {
-                if (listaRecados) {
-                    listaRecados.innerHTML = '<p class="text-gray-400 text-center py-6 text-base">A visualização dos recados está desativada no momento.</p>';
-                }
-            }
+            // Renderizar recados sempre
+            renderizarRecados();
 
             // Atualizar aviso de data limite - SEMPRE mostra se existir data
             const avisoDataLimite = document.getElementById('aviso-data-limite');
@@ -540,8 +521,7 @@
                             admin_username: configuracaoEvento.admin_username,
                             admin_password: configuracaoEvento.admin_password,
                             data_evento_timestamp: configuracaoEvento.data_evento_timestamp,
-                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao,
-                            mostrar_recados_publicos: configuracaoEvento.mostrar_recados_publicos
+                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao
                         })
                         .eq('id', existing.id)
                         .select();
@@ -556,8 +536,7 @@
                             admin_username: configuracaoEvento.admin_username,
                             admin_password: configuracaoEvento.admin_password,
                             data_evento_timestamp: configuracaoEvento.data_evento_timestamp,
-                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao,
-                            mostrar_recados_publicos: configuracaoEvento.mostrar_recados_publicos
+                            data_limite_confirmacao: configuracaoEvento.data_limite_confirmacao
                         }])
                         .select();
                 }
@@ -619,42 +598,6 @@
             } else {
                 toggleBg.style.backgroundColor = '#d1d5db';
                 toggleDot.style.transform = 'translateX(0)';
-            }
-        }
-
-        async function toggleRecadosPublicos(mostrar) {
-            if (!supabaseClient) return;
-            
-            configuracaoEvento.mostrar_recados_publicos = mostrar;
-            
-            try {
-                const { data: existing } = await supabaseClient
-                    .from('configuracao')
-                    .select('id')
-                    .limit(1)
-                    .single();
-
-                if (existing) {
-                    await supabaseClient
-                        .from('configuracao')
-                        .update({ mostrar_recados_publicos: mostrar })
-                        .eq('id', existing.id);
-                }
-            } catch (err) {
-                console.error('Erro ao atualizar recados públicos:', err);
-            }
-
-            atualizarInterfaceConvidado();
-            
-            const toggleBg2 = document.getElementById('toggle-bg-recados');
-            const toggleDot2 = document.getElementById('toggle-dot-recados');
-            
-            if (mostrar) {
-                toggleBg2.style.backgroundColor = '#6f0000';
-                toggleDot2.style.transform = 'translateX(24px)';
-            } else {
-                toggleBg2.style.backgroundColor = '#d1d5db';
-                toggleDot2.style.transform = 'translateX(0)';
             }
         }
 
@@ -971,9 +914,8 @@
                 nomeConvidadoAtual = nomeConvidado;
                 localStorage.setItem('nomeConvidado', nomeConvidado);
                 
-                // Mostra seção de recados e permite enviar
+                // Mostra seção de recados
                 document.getElementById('recados-section').style.display = 'block';
-                document.getElementById('recado-form').style.display = 'block';
 
                 await carregarDados();
             } catch (err) {
@@ -1054,20 +996,8 @@
                 nomeConvidadoAtual = nomeConvidado;
                 localStorage.setItem('nomeConvidado', nomeConvidado);
                 
-                // Mostra seção de recados MAS esconde o formulário de envio
+                // Mostra seção de recados
                 document.getElementById('recados-section').style.display = 'block';
-                document.getElementById('recado-form').style.display = 'none';
-                
-                // Altera o cabeçalho para refletir que só pode visualizar
-                const recadoHeader = document.getElementById('recado-header');
-                recadoHeader.innerHTML = `
-                    <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">
-                        Recados dos Convidados
-                    </h2>
-                    <p class="text-base text-gray-600">
-                        Veja as mensagens carinhosas enviadas para a aniversariante!
-                    </p>
-                `;
 
                 await carregarDados();
             } catch (err) {
@@ -1088,19 +1018,8 @@
             document.getElementById('decline-state').style.display = 'none';
             document.getElementById('confirmation-form').style.display = 'block';
             
-            // Esconde a seção de recados enquanto edita
+            // Esconde recados ao editar resposta
             document.getElementById('recados-section').style.display = 'none';
-            
-            // Restaura o cabeçalho original
-            const recadoHeader = document.getElementById('recado-header');
-            recadoHeader.innerHTML = `
-                <h2 class="text-2xl font-semibold mb-2" style="color: #6f0000;">
-                    Deixe um Recado
-                </h2>
-                <p class="text-base text-gray-600">
-                    Envie uma mensagem carinhosa para a aniversariante!
-                </p>
-            `;
             
             const respostaAtual = todasConfirmacoes.find(c => 
                 c.nome_convidado.toLowerCase() === nomeConvidadoAtual.toLowerCase()
@@ -1164,24 +1083,8 @@
         function renderizarRecados() {
             const lista = document.getElementById('lista-recados');
             
-            if (todosRecados.length === 0) {
-                lista.innerHTML = '<p class="text-gray-400 text-center py-6 text-base">Nenhum recado ainda. Seja o primeiro!</p>';
-            } else {
-                lista.innerHTML = todosRecados.map(r => {
-                    const dataObj = new Date(r.created_at);
-                    const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    
-                    return `
-                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 border rounded-xl p-4" style="border-color: #d4c4b0;">
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="font-semibold text-base" style="color: #6f0000;">${r.nome_convidado}</div>
-                                <div class="text-xs text-gray-400">${dataFormatada}</div>
-                            </div>
-                            <p class="text-gray-700 text-sm leading-relaxed">${r.mensagem}</p>
-                        </div>
-                    `;
-                }).join('');
-            }
+            // APENAS ADMIN PODE VER RECADOS - Convidados não veem
+            lista.innerHTML = '<p class="text-gray-400 text-center py-6 text-base">Apenas o organizador pode visualizar os recados.</p>';
         }
 
         // ==================== PAINEL ADMIN ====================
@@ -1194,7 +1097,6 @@
                 return acc + 1 + (c.tem_acompanhante ? 1 : 0);
             }, 0);
 
-            // CORREÇÃO: Contabilizar convidado + acompanhante como pessoas separadas
             document.getElementById('stat-confirmados').textContent = totalPessoas;
             document.getElementById('stat-declinados').textContent = declinados.length;
             document.getElementById('stat-acompanhantes').textContent = comAcompanhante;
@@ -1275,7 +1177,7 @@
                 listaRecados.innerHTML = todosRecados.map(r => {
                     const dataObj = new Date(r.created_at);
                     const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-                                        '   s ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                                        ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                     
                     return `
                         <div class="border-2 rounded-2xl p-5 hover:shadow-lg transition-shadow" style="border-color: #FFD700; background: linear-gradient(to right, #fff9e6, #ffffff);">
@@ -1364,124 +1266,6 @@
                     errorDiv.innerHTML = '<p class="text-red-800 font-bold">Erro ao excluir. Tente novamente.</p>';
                     document.body.appendChild(errorDiv);
                     setTimeout(() => errorDiv.remove(), 3000);
-                }
-            });
-        }
-
-        // ==================== MODAL RESPOSTA ====================
-        function abrirModalResposta(recadoId, nomeConvidado, mensagemAtual = '', respostaId = null) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 flex items-center justify-center z-50 px-4';
-            modal.style.background = 'rgba(0,0,0,0.7)';
-            modal.innerHTML = `
-                <div class="bg-white rounded-3xl p-8 max-w-xl w-full shadow-2xl">
-                    <h3 class="text-2xl font-bold mb-4" style="color: #8B0000;">
-                        ${respostaId ? 'Editar Resposta' : 'Responder Recado'}
-                    </h3>
-                    <p class="text-gray-600 mb-6">
-                        Respondendo para: <strong>${nomeConvidado}</strong>
-                    </p>
-                    
-                    <form id="form-resposta-admin" class="space-y-4">
-                        <div>
-                            <label class="block text-base font-semibold mb-2" style="color: #5d5d5d;">
-                                Sua Resposta:
-                            </label>
-                            <textarea 
-                                id="textarea-resposta-admin"
-                                required 
-                                rows="4"
-                                maxlength="500"
-                                class="w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none focus:ring-2 resize-none" 
-                                style="border-color: #8B0000;"
-                                placeholder="Escreva sua resposta carinhosa..."
-                            >${mensagemAtual}</textarea>
-                            <p class="text-sm text-gray-400 mt-1 text-right" id="char-count-resposta">${mensagemAtual.length}/500 caracteres</p>
-                        </div>
-                        
-                        <div class="flex gap-3">
-                            <button 
-                                type="button"
-                                class="cancelar-resposta-btn flex-1 py-3 rounded-xl border-2 font-bold" 
-                                style="border-color: #8B0000; color: #8B0000;"
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                type="submit"
-                                class="flex-1 py-3 rounded-xl text-white font-bold" 
-                                style="background-color: #10b981;"
-                            >
-                                ${respostaId ? 'Salvar Alterações' : 'Enviar Resposta'}
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <div id="loading-resposta" style="display: none;" class="text-center py-6">
-                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-transparent" style="border-color: #8B0000;"></div>
-                        <p class="text-base font-semibold mt-3" style="color: #8B0000;">Enviando...</p>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            const textarea = modal.querySelector('#textarea-resposta-admin');
-            const charCount = modal.querySelector('#char-count-resposta');
-            
-            textarea.addEventListener('input', function() {
-                charCount.textContent = `${this.value.length}/500 caracteres`;
-            });
-            
-            modal.querySelector('.cancelar-resposta-btn').addEventListener('click', () => modal.remove());
-            
-            modal.querySelector('#form-resposta-admin').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const mensagem = textarea.value.trim();
-                if (!mensagem) return;
-                
-                this.style.display = 'none';
-                modal.querySelector('#loading-resposta').style.display = 'block';
-                
-                try {
-                    if (respostaId) {
-                        // Editar resposta existente
-                        const { error } = await supabaseClient
-                            .from('respostas_recados')
-                            .update({ mensagem: mensagem })
-                            .eq('id', respostaId);
-                        
-                        if (error) throw error;
-                    } else {
-                        // Criar nova resposta
-                        const { error } = await supabaseClient
-                            .from('respostas_recados')
-                            .insert([{
-                                recado_id: recadoId,
-                                mensagem: mensagem
-                            }]);
-                        
-                        if (error) throw error;
-                    }
-                    
-                    await carregarDados();
-                    modal.remove();
-                    
-                    const sucesso = document.createElement('div');
-                    sucesso.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 border-2 border-green-400 px-6 py-3 rounded-xl shadow-lg z-50';
-                    sucesso.innerHTML = '<p class="text-green-800 font-bold">✅ Resposta enviada com sucesso!</p>';
-                    document.body.appendChild(sucesso);
-                    setTimeout(() => sucesso.remove(), 3000);
-                } catch (err) {
-                    console.error('Erro:', err);
-                    modal.querySelector('#loading-resposta').style.display = 'none';
-                    this.style.display = 'block';
-                    
-                    const erro = document.createElement('div');
-                    erro.className = 'mt-4 p-3 bg-red-50 border-2 border-red-300 rounded-xl text-center';
-                    erro.innerHTML = '<p class="text-red-700 font-semibold">Erro ao enviar. Tente novamente.</p>';
-                    this.appendChild(erro);
-                    setTimeout(() => erro.remove(), 3000);
                 }
             });
         }
@@ -1886,7 +1670,7 @@
                 return;
             }
 
-            // Caso padr  o: mostrar login
+            // Caso padrão: mostrar login
             document.getElementById('guest-page').style.display = 'none';
             document.getElementById('login-page').style.display = 'flex';
             document.getElementById('admin-page').style.display = 'none';
@@ -1985,11 +1769,6 @@
                 checkbox.checked = !checkbox.checked;
                 toggleAvisoCriancas(checkbox.checked);
             });
-            document.getElementById('toggle-bg-recados').addEventListener('click', function() {
-                const checkbox = document.getElementById('toggle-recados-publicos');
-                checkbox.checked = !checkbox.checked;
-                toggleRecadosPublicos(checkbox.checked);
-            });
             document.getElementById('mensagem-recado').addEventListener('input', function(e) {
                 const count = e.target.value.length;
                 document.getElementById('char-count').textContent = `${count}/500 caracteres`;
@@ -1997,5 +1776,5 @@
             document.getElementById('recado-form').addEventListener('submit', enviarRecado);
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b6815c615d2c13d',t:'MTc2NzE2NjM2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b782f04a26dc13d',t:'MTc2NzMzNTE3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
